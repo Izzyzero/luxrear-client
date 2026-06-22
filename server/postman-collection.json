@@ -1,0 +1,367 @@
+{
+  "info": {
+    "name": "LUXREAR Business Club API",
+    "description": "Complete auth endpoint testing for LUXREAR MVP Day 3",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5000",
+      "type": "string"
+    },
+    {
+      "key": "accessToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "refreshToken",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Health Check",
+      "item": [
+        {
+          "name": "01 - Health Check",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/health",
+            "description": "Confirms server is running and connected to MongoDB"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Auth - Public",
+      "item": [
+        {
+          "name": "02 - Register (success)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json.data && json.data.access_token) {",
+                  "  pm.collectionVariables.set('accessToken', json.data.access_token);",
+                  "  pm.collectionVariables.set('refreshToken', json.data.refresh_token);",
+                  "  console.log('✅ Tokens saved automatically');",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/auth/register",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"full_name\": \"John Doe\",\n  \"email\": \"john@example.com\",\n  \"password\": \"Test1234\"\n}"
+            },
+            "description": "Expected: 201 with access_token and refresh_token. Tokens are auto-saved to collection variables."
+          }
+        },
+        {
+          "name": "03 - Register (duplicate email → 409)",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/auth/register",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"full_name\": \"John Doe\",\n  \"email\": \"john@example.com\",\n  \"password\": \"Test1234\"\n}"
+            },
+            "description": "Expected: 409 - An account with this email already exists."
+          }
+        },
+        {
+          "name": "04 - Register (weak password → 400)",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/auth/register",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"full_name\": \"Jane\",\n  \"email\": \"jane@example.com\",\n  \"password\": \"weak\"\n}"
+            },
+            "description": "Expected: 400 - Validation failed. Password too short and missing uppercase/number."
+          }
+        },
+        {
+          "name": "05 - Register (no email or phone → 400)",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/auth/register",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"full_name\": \"Jane\",\n  \"password\": \"Test1234\"\n}"
+            },
+            "description": "Expected: 400 - Either email or phone is required."
+          }
+        },
+        {
+          "name": "06 - Register (phone only)",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/auth/register",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"full_name\": \"Alice Smith\",\n  \"phone\": \"+2348012345678\",\n  \"password\": \"Test1234\"\n}"
+            },
+            "description": "Expected: 201. Phone-only registration without email."
+          }
+        },
+        {
+          "name": "07 - Login (success)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json.data && json.data.access_token) {",
+                  "  pm.collectionVariables.set('accessToken', json.data.access_token);",
+                  "  pm.collectionVariables.set('refreshToken', json.data.refresh_token);",
+                  "  console.log('✅ Tokens saved automatically');",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/auth/login",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"john@example.com\",\n  \"password\": \"Test1234\"\n}"
+            },
+            "description": "Expected: 200 with tokens. Tokens auto-saved."
+          }
+        },
+        {
+          "name": "08 - Login (wrong password → 401)",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/auth/login",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"john@example.com\",\n  \"password\": \"WrongPass1\"\n}"
+            },
+            "description": "Expected: 401 - Invalid credentials."
+          }
+        },
+        {
+          "name": "09 - Login (phone)",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/auth/login",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone\": \"+2348012345678\",\n  \"password\": \"Test1234\"\n}"
+            },
+            "description": "Expected: 200. Login using phone number."
+          }
+        },
+        {
+          "name": "10 - Refresh Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json.data && json.data.access_token) {",
+                  "  pm.collectionVariables.set('accessToken', json.data.access_token);",
+                  "  console.log('✅ New access token saved');",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/auth/refresh",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refresh_token\": \"{{refreshToken}}\"\n}"
+            },
+            "description": "Expected: 200 with new access_token. Uses the saved refresh token variable."
+          }
+        },
+        {
+          "name": "11 - Forgot Password",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/auth/forgot-password",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"john@example.com\"\n}"
+            },
+            "description": "Expected: 200 always (same message whether email exists or not — security by design)."
+          }
+        },
+        {
+          "name": "12 - Reset Password",
+          "request": {
+            "method": "PATCH",
+            "url": "{{baseUrl}}/api/auth/reset-password",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"PASTE_TOKEN_FROM_EMAIL_HERE\",\n  \"password\": \"NewPass1234\"\n}"
+            },
+            "description": "Expected: 200. Paste the token from the reset email link (?token=xxxxx)."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Auth - Protected (token required)",
+      "item": [
+        {
+          "name": "13 - Get Me (no token → 401)",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/auth/me",
+            "description": "Expected: 401 - Not authenticated. No Authorization header sent."
+          }
+        },
+        {
+          "name": "14 - Get Me (with token → 200)",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/auth/me",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "description": "Expected: 200 with user and profile data. Uses saved access token."
+          }
+        },
+        {
+          "name": "15 - Complete Onboarding",
+          "request": {
+            "method": "PATCH",
+            "url": "{{baseUrl}}/api/auth/onboarding",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"country\": \"Nigeria\",\n  \"business_type\": \"Tech Startup\",\n  \"role\": \"founder\"\n}"
+            },
+            "description": "Expected: 200. Sets country, business_type, role. onboarding_complete becomes true."
+          }
+        },
+        {
+          "name": "16 - Complete Onboarding (invalid role → 400)",
+          "request": {
+            "method": "PATCH",
+            "url": "{{baseUrl}}/api/auth/onboarding",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"country\": \"Nigeria\",\n  \"business_type\": \"Tech Startup\",\n  \"role\": \"boss\"\n}"
+            },
+            "description": "Expected: 400 - Invalid role. 'boss' is not in the allowed enum."
+          }
+        },
+        {
+          "name": "17 - Change Password",
+          "request": {
+            "method": "PATCH",
+            "url": "{{baseUrl}}/api/auth/change-password",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"current_password\": \"Test1234\",\n  \"new_password\": \"NewPass5678\"\n}"
+            },
+            "description": "Expected: 200. Password changed successfully."
+          }
+        },
+        {
+          "name": "18 - Change Password (wrong current → 401)",
+          "request": {
+            "method": "PATCH",
+            "url": "{{baseUrl}}/api/auth/change-password",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"current_password\": \"WrongCurrent1\",\n  \"new_password\": \"NewPass5678\"\n}"
+            },
+            "description": "Expected: 401 - Current password is incorrect."
+          }
+        },
+        {
+          "name": "19 - Logout",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/auth/logout",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "description": "Expected: 200. Refresh token wiped from database."
+          }
+        },
+        {
+          "name": "20 - Refresh after logout (invalid → 401)",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/auth/refresh",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refresh_token\": \"{{refreshToken}}\"\n}"
+            },
+            "description": "Expected: 401. Refresh token was invalidated by logout."
+          }
+        }
+      ]
+    }
+  ]
+}

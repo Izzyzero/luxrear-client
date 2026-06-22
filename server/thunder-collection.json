@@ -1,0 +1,298 @@
+{
+  "clientName": "Thunder Client",
+  "collectionName": "LUXREAR Business Club API",
+  "collectionId": "luxrear-api-v1",
+  "dateExported": "2026-06-20",
+  "version": "1.1",
+  "folders": [
+    {
+      "id": "folder-health",
+      "name": "Health Check",
+      "containerId": ""
+    },
+    {
+      "id": "folder-auth-public",
+      "name": "Auth - Public",
+      "containerId": ""
+    },
+    {
+      "id": "folder-auth-protected",
+      "name": "Auth - Protected (need token)",
+      "containerId": ""
+    }
+  ],
+  "requests": [
+    {
+      "id": "req-01",
+      "colId": "luxrear-api-v1",
+      "containerId": "folder-health",
+      "name": "01 - Health Check",
+      "url": "http://localhost:5000/health",
+      "method": "GET",
+      "sortNum": 1,
+      "headers": [],
+      "params": [],
+      "body": { "type": "none" }
+    },
+    {
+      "id": "req-02",
+      "colId": "luxrear-api-v1",
+      "containerId": "folder-auth-public",
+      "name": "02 - Register (success)",
+      "url": "http://localhost:5000/api/auth/register",
+      "method": "POST",
+      "sortNum": 2,
+      "headers": [
+        { "name": "Content-Type", "value": "application/json" }
+      ],
+      "params": [],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"full_name\": \"John Doe\",\n  \"email\": \"john@example.com\",\n  \"password\": \"Test1234\"\n}"
+      }
+    },
+    {
+      "id": "req-03",
+      "colId": "luxrear-api-v1",
+      "containerId": "folder-auth-public",
+      "name": "03 - Register (duplicate email → 409)",
+      "url": "http://localhost:5000/api/auth/register",
+      "method": "POST",
+      "sortNum": 3,
+      "headers": [
+        { "name": "Content-Type", "value": "application/json" }
+      ],
+      "params": [],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"full_name\": \"John Doe\",\n  \"email\": \"john@example.com\",\n  \"password\": \"Test1234\"\n}"
+      }
+    },
+    {
+      "id": "req-04",
+      "colId": "luxrear-api-v1",
+      "containerId": "folder-auth-public",
+      "name": "04 - Register (weak password → 400)",
+      "url": "http://localhost:5000/api/auth/register",
+      "method": "POST",
+      "sortNum": 4,
+      "headers": [
+        { "name": "Content-Type", "value": "application/json" }
+      ],
+      "params": [],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"full_name\": \"Jane\",\n  \"email\": \"jane@example.com\",\n  \"password\": \"weak\"\n}"
+      }
+    },
+    {
+      "id": "req-05",
+      "colId": "luxrear-api-v1",
+      "containerId": "folder-auth-public",
+      "name": "05 - Register (no email or phone → 400)",
+      "url": "http://localhost:5000/api/auth/register",
+      "method": "POST",
+      "sortNum": 5,
+      "headers": [
+        { "name": "Content-Type", "value": "application/json" }
+      ],
+      "params": [],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"full_name\": \"Jane\",\n  \"password\": \"Test1234\"\n}"
+      }
+    },
+    {
+      "id": "req-06",
+      "colId": "luxrear-api-v1",
+      "containerId": "folder-auth-public",
+      "name": "06 - Register (phone only)",
+      "url": "http://localhost:5000/api/auth/register",
+      "method": "POST",
+      "sortNum": 6,
+      "headers": [
+        { "name": "Content-Type", "value": "application/json" }
+      ],
+      "params": [],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"full_name\": \"Alice Smith\",\n  \"phone\": \"+2348012345678\",\n  \"password\": \"Test1234\"\n}"
+      }
+    },
+    {
+      "id": "req-07",
+      "colId": "luxrear-api-v1",
+      "containerId": "folder-auth-public",
+      "name": "07 - Login (success)",
+      "url": "http://localhost:5000/api/auth/login",
+      "method": "POST",
+      "sortNum": 7,
+      "headers": [
+        { "name": "Content-Type", "value": "application/json" }
+      ],
+      "params": [],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"email\": \"john@example.com\",\n  \"password\": \"Test1234\"\n}"
+      }
+    },
+    {
+      "id": "req-08",
+      "colId": "luxrear-api-v1",
+      "containerId": "folder-auth-public",
+      "name": "08 - Login (wrong password → 401)",
+      "url": "http://localhost:5000/api/auth/login",
+      "method": "POST",
+      "sortNum": 8,
+      "headers": [
+        { "name": "Content-Type", "value": "application/json" }
+      ],
+      "params": [],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"email\": \"john@example.com\",\n  \"password\": \"WrongPass1\"\n}"
+      }
+    },
+    {
+      "id": "req-09",
+      "colId": "luxrear-api-v1",
+      "containerId": "folder-auth-public",
+      "name": "09 - Refresh Token",
+      "url": "http://localhost:5000/api/auth/refresh",
+      "method": "POST",
+      "sortNum": 9,
+      "headers": [
+        { "name": "Content-Type", "value": "application/json" }
+      ],
+      "params": [],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"refresh_token\": \"PASTE_REFRESH_TOKEN_HERE\"\n}"
+      }
+    },
+    {
+      "id": "req-10",
+      "colId": "luxrear-api-v1",
+      "containerId": "folder-auth-public",
+      "name": "10 - Forgot Password",
+      "url": "http://localhost:5000/api/auth/forgot-password",
+      "method": "POST",
+      "sortNum": 10,
+      "headers": [
+        { "name": "Content-Type", "value": "application/json" }
+      ],
+      "params": [],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"email\": \"john@example.com\"\n}"
+      }
+    },
+    {
+      "id": "req-11",
+      "colId": "luxrear-api-v1",
+      "containerId": "folder-auth-public",
+      "name": "11 - Reset Password",
+      "url": "http://localhost:5000/api/auth/reset-password",
+      "method": "PATCH",
+      "sortNum": 11,
+      "headers": [
+        { "name": "Content-Type", "value": "application/json" }
+      ],
+      "params": [],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"token\": \"PASTE_TOKEN_FROM_EMAIL_HERE\",\n  \"password\": \"NewPass1234\"\n}"
+      }
+    },
+    {
+      "id": "req-12",
+      "colId": "luxrear-api-v1",
+      "containerId": "folder-auth-protected",
+      "name": "12 - Get Me (no token → 401)",
+      "url": "http://localhost:5000/api/auth/me",
+      "method": "GET",
+      "sortNum": 12,
+      "headers": [],
+      "params": [],
+      "body": { "type": "none" }
+    },
+    {
+      "id": "req-13",
+      "colId": "luxrear-api-v1",
+      "containerId": "folder-auth-protected",
+      "name": "13 - Get Me (with token → 200)",
+      "url": "http://localhost:5000/api/auth/me",
+      "method": "GET",
+      "sortNum": 13,
+      "headers": [
+        { "name": "Authorization", "value": "Bearer PASTE_ACCESS_TOKEN_HERE" }
+      ],
+      "params": [],
+      "body": { "type": "none" }
+    },
+    {
+      "id": "req-14",
+      "colId": "luxrear-api-v1",
+      "containerId": "folder-auth-protected",
+      "name": "14 - Complete Onboarding",
+      "url": "http://localhost:5000/api/auth/onboarding",
+      "method": "PATCH",
+      "sortNum": 14,
+      "headers": [
+        { "name": "Content-Type", "value": "application/json" },
+        { "name": "Authorization", "value": "Bearer PASTE_ACCESS_TOKEN_HERE" }
+      ],
+      "params": [],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"country\": \"Nigeria\",\n  \"business_type\": \"Tech Startup\",\n  \"role\": \"founder\"\n}"
+      }
+    },
+    {
+      "id": "req-15",
+      "colId": "luxrear-api-v1",
+      "containerId": "folder-auth-protected",
+      "name": "15 - Change Password",
+      "url": "http://localhost:5000/api/auth/change-password",
+      "method": "PATCH",
+      "sortNum": 15,
+      "headers": [
+        { "name": "Content-Type", "value": "application/json" },
+        { "name": "Authorization", "value": "Bearer PASTE_ACCESS_TOKEN_HERE" }
+      ],
+      "params": [],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"current_password\": \"Test1234\",\n  \"new_password\": \"NewPass5678\"\n}"
+      }
+    },
+    {
+      "id": "req-16",
+      "colId": "luxrear-api-v1",
+      "containerId": "folder-auth-protected",
+      "name": "16 - Logout",
+      "url": "http://localhost:5000/api/auth/logout",
+      "method": "POST",
+      "sortNum": 16,
+      "headers": [
+        { "name": "Authorization", "value": "Bearer PASTE_ACCESS_TOKEN_HERE" }
+      ],
+      "params": [],
+      "body": { "type": "none" }
+    },
+    {
+      "id": "req-17",
+      "colId": "luxrear-api-v1",
+      "containerId": "folder-auth-protected",
+      "name": "17 - Get Me after logout (token still works until expiry)",
+      "url": "http://localhost:5000/api/auth/me",
+      "method": "GET",
+      "sortNum": 17,
+      "headers": [
+        { "name": "Authorization", "value": "Bearer PASTE_ACCESS_TOKEN_HERE" }
+      ],
+      "params": [],
+      "body": { "type": "none" }
+    }
+  ]
+}
