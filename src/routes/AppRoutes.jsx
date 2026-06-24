@@ -2,7 +2,8 @@ import {Routes, Route} from 'react-router-dom';
 import {LandingPage} from '../pages/Landing/LandingPage';
 import {LoginPage} from '../pages/Auth/Login';
 import {RegisterPage} from '../pages/Auth/Register';
-
+import{ ForgotPasswordPage} from '../pages/Auth/ForgottenPassword'
+import {ResetPasswordPage} from '../pages/Auth/ResetPasswordPage'
 function AppRoutes() {
   return (
     <Routes>
