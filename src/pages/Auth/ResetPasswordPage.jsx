@@ -4,7 +4,7 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Eye, EyeOff } from "lucide-react";
-import logo from '../../assets/images/logo.jpeg'
+import logo from '../../assets/images/logo.png'
 
 const resetPasswordSchema = z
   .object({

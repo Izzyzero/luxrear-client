@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Eye, EyeOff } from "lucide-react";
-import logo from '../../assets/images/logo.jpeg'
+import logo from '../../assets/images/logo.png'
 
 const loginSchema = z
   .object({
@@ -120,7 +120,7 @@ export const LoginPage = () => {
   };
 
   return (
-    <>
+    <div className='bg-slate-50'>
       <div>
         <Link to="/">
           <img src={logo} alt="Back to home" className='size-24' />
@@ -261,6 +261,6 @@ export const LoginPage = () => {
           </form>
         </div>
       </div>
-    </>
+    </div>
   );
 }

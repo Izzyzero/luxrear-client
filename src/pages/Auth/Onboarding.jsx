@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form'
 import { useNavigate } from 'react-router-dom';
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { getAccessToken } from '../../utils/authStorage'
+import { getAccessToken } from '../../services/authService'
 
 const onboardingSchema = z.object({
   country: z.string().min(1, "Please select a location"),
@@ -73,15 +73,16 @@ export const OnboardingPage = () => {
 
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col">
 
-          <label className='text-sm font-medium text-slate-700 mb-1.5'>Location</label>
+          <label className='text-sm font-medium text-slate-700 mb-1.5'>Country</label>
           <select
             {...register("country")}
             defaultValue=""
             className='rounded-lg border border-slate-300 px-3 py-2.5 mb-1 text-base sm:text-sm text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 bg-white'
           >
-            <option value="" disabled>Select location</option>
-            <option value="lagos">Lagos</option>
-            <option value="abuja">Abuja</option>
+            <option value="" disabled>Select Country</option>
+            <option value="nigeria">Nigeria</option>
+            <option value="ghana">Ghana</option>
+             <option value="south africa">South Africa</option>
             <option value="other">Other</option>
           </select>
           {errors.country ? (
@@ -114,9 +115,10 @@ export const OnboardingPage = () => {
             className='rounded-lg border border-slate-300 px-3.5 py-2.5 mb-1 text-base sm:text-sm text-slate-900 outline-none transition focus:border-blue-800 focus:ring-2 focus:ring-blue-100 bg-white'
           >
             <option value="" disabled>Select role</option>
-            <option value="owner">Owner</option>
-            <option value="staff">Staff</option>
-            <option value="admin">Admin</option>
+            <option value="founder">Founder</option>
+            <option value="investor">Investor</option>
+            <option value="service provider">Service Provider</option>
+             <option value="student">Student</option>
           </select>
           {errors.role ? (
             <p className='text-xs text-red-600 mt-1 mb-7'>{errors.role.message}</p>

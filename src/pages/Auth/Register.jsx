@@ -4,7 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Eye, EyeOff } from "lucide-react";
-import logo from '../../assets/images/logo.jpeg'
+import logo from '../../assets/images/logo.png'
 
 const registerSchema = z
   .object({
@@ -123,13 +123,13 @@ export const RegisterPage = () => {
   }
 
   return (
-    <>
+    <div className='bg-slate-50'>
       <div>
         <Link to="/">
           <img src={logo} alt="Back to home" className='size-24' />
         </Link>
       </div>
-      <div className='flex items-center justify-center min-h-screen bg-slate-50 px-4 py-6 sm:py-10'>
+      <div className='flex items-center justify-center bg-slate-50 px-4 py-6 sm:py-10'>
         <div className='w-full max-w-md bg-white rounded-2xl shadow-sm border border-slate-200 px-5 py-8 sm:px-8 sm:py-10'>
 
           <div className='mb-6 sm:mb-8'>
@@ -262,6 +262,6 @@ export const RegisterPage = () => {
           </form>
         </div>
       </div>
-    </>
+    </div>
   );
 }
