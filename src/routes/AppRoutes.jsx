@@ -16,6 +16,8 @@ function AppRoutes() {
       <Route path="/reset-password" element={<ResetPasswordPage />} />
       <Route path="/onboarding" element={<OnboardingPage />} />
       <Route path="/dashboard" element={<DashboardPage />} />
+
+      
       
       
     </Routes>

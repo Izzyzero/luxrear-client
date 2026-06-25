@@ -132,7 +132,7 @@ export const LoginPage = () => {
 
           <div className='mb-6 sm:mb-8'>
             <h2 className='text-xl sm:text-2xl font-semibold text-slate-900 tracking-tight'>Welcome back</h2>
-            <p className='text-sm text-slate-500 mt-1'>Sign in to your account to continue</p>
+            <p className='text-sm text-slate-500 mt-1'>sign in to your account to continue</p>
           </div>
 
           <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col">
