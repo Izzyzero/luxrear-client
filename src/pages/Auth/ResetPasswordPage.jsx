@@ -80,7 +80,7 @@ export const ResetPasswordPage = () => {
         </Link>
       </div>
 
-      <div className='flex items-center justify-center min-h-screen bg-slate-50 px-4 py-6 sm:py-10'>
+      <div className='flex items-center justify-center  bg-slate-50 px-4 py-6 sm:py-10'>
         <div className='w-full max-w-md bg-white rounded-2xl shadow-sm border border-slate-200 px-5 py-8 sm:px-8 sm:py-10'>
 
           <div className='mb-6 sm:mb-8'>

@@ -11,4 +11,24 @@ export const clearTokens = () => {
   localStorage.removeItem("refresh_token");
   sessionStorage.removeItem("access_token");
   sessionStorage.removeItem("refresh_token");
+
 };
+export const logout = async () => {
+  const accessToken = getAccessToken();
+ 
+  if (accessToken) {
+    try {
+      await fetch("http://localhost:5000/api/auth/logout", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${accessToken}`,
+        },
+      });
+    } catch (error) {
+      console.warn("Logout request failed (clearing local session anyway):", error.message);
+    }
+  }
+ 
+  clearTokens();
+};
+ 
