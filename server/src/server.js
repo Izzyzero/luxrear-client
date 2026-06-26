@@ -14,12 +14,32 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 // ─── Security Headers ─────────────────────────
-app.use(helmet());
+// In development, disable CSP to avoid blocking frontend API calls
+// In production, set proper CSP directives via environment variables
+app.use(
+  helmet({
+    crossOriginResourcePolicy: { policy: 'cross-origin' },
+    contentSecurityPolicy: process.env.NODE_ENV === 'production' ? {
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: ["'self'"],
+        styleSrc: ["'self'", "'unsafe-inline'"],
+        imgSrc: ["'self'", "data:", "https:"],
+        connectSrc: ["'self'", process.env.CLIENT_URL || 'http://localhost:5173'],
+        fontSrc: ["'self'", "https:", "data:"],
+        objectSrc: ["'none'"],
+        upgradeInsecureRequests: [],
+      },
+    } : false,
+  })
+);
 
 // ─── CORS ─────────────────────────────────────
 app.use(
   cors({
-    origin: process.env.CLIENT_URL || 'http://localhost:5173',
+    origin: process.env.NODE_ENV === 'production'
+      ? (process.env.CLIENT_URL || 'http://localhost:5173')
+      : true, // Allow all origins in development
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
