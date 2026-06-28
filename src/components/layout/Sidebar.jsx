@@ -16,7 +16,7 @@ import logo from '../../assets/images/logo.png'
 import { logout } from '../../services/authService'
 
 const navItems = [
-  { label: 'Home Feed', to: '/dashboard', icon: Home },
+  { label: 'Home Feed', to: '/dashboard', icon: Home, end: true },
   { label: 'Profile', to: '/dashboard/profile', icon: User },
   { label: 'Exchange', to: '/dashboard/exchange', icon: Repeat },
   { label: 'Community', to: '/dashboard/community', icon: Users },
@@ -65,10 +65,11 @@ export const Sidebar = ({ role, isOpen, onClose }) => {
         </div>
 
         <nav className='flex-1 px-3 py-4 flex flex-col gap-1 overflow-y-auto'>
-          {items.map(({ label, to, icon: Icon }) => (
+          {items.map(({ label, to, icon: Icon, end }) => (
             <NavLink
               key={to}
               to={to}
+              end={end}
               onClick={onClose}
               className={({ isActive }) =>
                 `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${

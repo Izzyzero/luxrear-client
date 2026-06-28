@@ -19,11 +19,11 @@ export const useCurrentUser = () => {
       }
 
       try {
-        // const response = await fetch("http://localhost:5000/api/auth/me", {
-        //   headers: {
-        //     "Authorization": `Bearer ${accessToken}`,
-        //   },
-        // });
+        const response = await fetch("http://localhost:5000/api/auth/me", {
+          headers: {
+            "Authorization": `Bearer ${accessToken}`,
+          },
+        });
 
         const result = await response.json();
 

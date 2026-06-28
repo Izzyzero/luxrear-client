@@ -141,7 +141,7 @@ export const ProfilePage = () => {
 
     const accessToken = getAccessToken()
     const formData = new FormData()
-    formData.append('image', file) // field name assumed — confirm with backend dev if upload fails
+    formData.append('profile_picture', file) // field name assumed — confirm with backend dev if upload fails
 
     try {
       const response = await fetch(`${API_BASE}/me/picture`, {
@@ -218,18 +218,18 @@ export const ProfilePage = () => {
     const accessToken = getAccessToken()
 
     const payload = {
-      full_name: data.full_name,
-      business_name: data.business_name,
-      description: data.description,
-      industry: data.industry,
-      location: data.location,
+      full_name: data.full_name?.trim(),
+      business_name: data.business_name?.trim(),
+      description: data.description?.trim(),
+      industry: data.industry?.trim(),
+      location: data.location?.trim(),
       services: data.services.map((s) => s.value).filter(Boolean),
-      origin_country: data.origin_country,
-      current_country: data.current_country,
+      origin_country: data.origin_country?.trim() || undefined,
+      current_country: data.current_country?.trim() || undefined,
       show_in_diaspora: data.show_in_diaspora,
-      website: data.website,
-      linkedin: data.linkedin,
-      whatsapp: data.whatsapp,
+      website: data.website?.trim() || undefined,
+      linkedin: data.linkedin?.trim() || undefined,
+      whatsapp: data.whatsapp?.trim() || undefined,
     };
 
     try {
@@ -281,7 +281,7 @@ export const ProfilePage = () => {
       <div className='bg-white rounded-2xl border border-slate-200 p-5 mb-6'>
         <div className='flex items-center justify-between mb-2'>
           <h2 className='text-sm font-semibold text-slate-900'>Complete Your Profile</h2>
-          <span className='text-sm font-semibold text-primary-700'>{completion}%</span>
+          <span className='text-sm font-semibold text-primary -700'>{completion}%</span>
         </div>
         <div className='w-full h-2 bg-slate-100 rounded-full overflow-hidden mb-3'>
           <div
@@ -534,8 +534,9 @@ export const ProfilePage = () => {
         <button
           type="submit"
           disabled={saveStatus === 'saving'}
-          className="rounded-lg bg-primary-600 text-white font-medium py-2.5 text-sm transition hover:bg-primary-700 active:bg-primary-800 shadow-sm disabled:opacity-60 disabled:cursor-not-allowed mt-1"
+          className="rounded-lg bg-primary-900 text-white font-medium py-2.5 text-sm transition hover:bg-primary-800 active:bg-primary-800 shadow-sm disabled:opacity-60 disabled:cursor-not-allowed mt-1"
         >
+      
           {saveStatus === 'saving' ? 'Saving...' : 'Save changes'}
         </button>
 
