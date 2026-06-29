@@ -13,6 +13,13 @@ const categories = [
   { name: 'Sales & Marketing', slug: 'sales-marketing', type: 'learning', description: 'Sales techniques and marketing strategies' },
   { name: 'Financial Literacy', slug: 'financial-literacy', type: 'learning', description: 'Finance and money management' },
   { name: 'Export & Trade', slug: 'export-trade', type: 'learning', description: 'International trade and export guides' },
+  // Exchange categories
+  { name: 'Need Help', slug: 'need-help', type: 'exchange', description: 'Request assistance or support for your business' },
+  { name: 'Investment Opportunity', slug: 'investment', type: 'exchange', description: 'Investment opportunities and co-investor requests' },
+  { name: 'Partnership Request', slug: 'partnership', type: 'exchange', description: 'Find business partners and collaborators' },
+  { name: 'Supplier Request', slug: 'supplier-request', type: 'exchange', description: 'Find suppliers and vendors' },
+  { name: 'Business Offer', slug: 'business-offer', type: 'exchange', description: 'Business deals and offers' },
+  { name: 'Job / Internship', slug: 'job', type: 'exchange', description: 'Job openings and internship opportunities' },
 ];
 
 export const seedCategories = async () => {

@@ -129,11 +129,12 @@ export const getProfileById = async (req, res, next) => {
 // ─────────────────────────────────────────────
 export const getAllProfiles = async (req, res, next) => {
   try {
-    const { industry, country, page = 1, limit = 20 } = req.query;
+    const { industry, country, diaspora, page = 1, limit = 20 } = req.query;
 
     const filter = {};
     if (industry) filter.industry = { $regex: industry, $options: 'i' };
     if (country) filter.location = { $regex: country, $options: 'i' };
+    if (diaspora === 'true') filter.show_in_diaspora = true;
 
     const skip = (parseInt(page) - 1) * parseInt(limit);
 

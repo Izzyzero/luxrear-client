@@ -1,0 +1,557 @@
+╔═══════════════════════════════════════════════════════════════╗
+║  LUXREAR API — Copy-Paste Curl Commands                     ║
+║  Replace EMAIL each time you register (use a unique one)    ║
+╚═══════════════════════════════════════════════════════════════╝
+
+=============================================================================
+ DAY 3 — AUTHENTICATION
+=============================================================================
+
+--- 3a. Register (change EMAIL each run) ---
+
+curl -s -X POST "http://localhost:5000/api/auth/register" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "full_name":"John Doe",
+    "email":"john_123@test.com",
+    "password":"StrongPass1!"
+  }' | python3 -m json.tool
+
+--- 3b. Login ---
+
+ACCESS=$(curl -s -X POST "http://localhost:5000/api/auth/login" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email":"john_123@test.com",
+    "password":"StrongPass1!"
+  }' | python3 -c "import sys,json; print(json.load(sys.stdin).get('data',{}).get('access_token',''))")
+echo "TOKEN: $ACCESS"
+
+--- 3c. Get Current User ---
+
+curl -s "http://localhost:5000/api/auth/me" -H "Authorization: Bearer $ACCESS" | python3 -m json.tool
+
+--- 3d. Refresh Token ---
+
+REFRESH=$(curl -s -X POST "http://localhost:5000/api/auth/login" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email":"john_123@test.com",
+    "password":"StrongPass1!"
+  }' | python3 -c "import sys,json; print(json.load(sys.stdin).get('data',{}).get('refresh_token',''))")
+
+curl -s -X POST "http://localhost:5000/api/auth/refresh" \
+  -H "Content-Type: application/json" \
+  -d "{\"refresh_token\":\"$REFRESH\"}" | python3 -m json.tool
+
+--- 3e. Verify Email (get token from MongoDB first) ---
+
+curl -s "http://localhost:5000/api/auth/verify-email?token=TOKEN_FROM_DB"
+
+--- 3f. Forgot Password ---
+
+curl -s -X POST "http://localhost:5000/api/auth/forgot-password" \
+  -H "Content-Type: application/json" \
+  -d '{"email":"john_123@test.com"}' | python3 -m json.tool
+
+--- 3g. Change Password ---
+
+curl -s -X PATCH "http://localhost:5000/api/auth/change-password" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $ACCESS" \
+  -d '{
+    "current_password":"StrongPass1!",
+    "new_password":"NewStrong1!"
+  }' | python3 -m json.tool
+
+--- 3h. Onboarding ---
+
+curl -s -X PATCH "http://localhost:5000/api/auth/onboarding" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $ACCESS" \
+  -d '{
+    "country":"Nigeria",
+    "business_type":"Technology",
+    "role":"founder"
+  }' | python3 -m json.tool
+
+--- 3i. Logout ---
+
+curl -s -X POST "http://localhost:5000/api/auth/logout" \
+  -H "Authorization: Bearer $ACCESS" | python3 -m json.tool
+
+
+=============================================================================
+ DAY 4 — MEMBER PROFILE (Business Passport)
+=============================================================================
+
+--- Login first ---
+
+ACCESS=$(curl -s -X POST "http://localhost:5000/api/auth/login" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email":"john_123@test.com",
+    "password":"StrongPass1!"
+  }' | python3 -c "import sys,json; print(json.load(sys.stdin).get('data',{}).get('access_token',''))")
+
+--- 4a. Get My Profile ---
+
+curl -s "http://localhost:5000/api/profiles/me" -H "Authorization: Bearer $ACCESS" | python3 -m json.tool
+
+--- 4b. Update Profile ---
+
+curl -s -X PUT "http://localhost:5000/api/profiles/me" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $ACCESS" \
+  -d '{
+    "business_name":"John Tech Ventures",
+    "industry":"Technology",
+    "location":"Lagos, Nigeria",
+    "description":"Building the future of African tech",
+    "services":["Software Development","Consulting"],
+    "website":"https://johntech.com",
+    "linkedin":"https://linkedin.com/in/johndoe",
+    "whatsapp":"+2348012345678",
+    "origin_country":"Nigeria",
+    "current_country":"Nigeria",
+    "show_in_diaspora":false
+  }' | python3 -m json.tool
+
+--- 4c. Browse Profiles (paginated) ---
+
+curl -s "http://localhost:5000/api/profiles?page=1&limit=10" \
+  -H "Authorization: Bearer $ACCESS" | python3 -m json.tool
+
+--- 4d. Filter by industry ---
+
+curl -s "http://localhost:5000/api/profiles?industry=Technology" \
+  -H "Authorization: Bearer $ACCESS" | python3 -m json.tool
+
+--- 4e. Filter by location ---
+
+curl -s "http://localhost:5000/api/profiles?location=Lagos" \
+  -H "Authorization: Bearer $ACCESS" | python3 -m json.tool
+
+--- 4f. Get Profile by ID (replace PROFILE_ID) ---
+
+curl -s "http://localhost:5000/api/profiles/PROFILE_ID" \
+  -H "Authorization: Bearer $ACCESS" | python3 -m json.tool
+
+--- 4g. Upload Profile Picture (replace path) ---
+
+curl -s -X POST "http://localhost:5000/api/profiles/me/picture" \
+  -H "Authorization: Bearer $ACCESS" \
+  -F "profile_picture=@/path/to/image.jpg" | python3 -m json.tool
+
+--- 4h. Remove Profile Picture ---
+
+curl -s -X DELETE "http://localhost:5000/api/profiles/me/picture" \
+  -H "Authorization: Bearer $ACCESS" | python3 -m json.tool
+
+
+=============================================================================
+ DAY 5 — HOME FEED
+=============================================================================
+
+--- Login ---
+
+ACCESS=$(curl -s -X POST "http://localhost:5000/api/auth/login" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email":"john_123@test.com",
+    "password":"StrongPass1!"
+  }' | python3 -c "import sys,json; print(json.load(sys.stdin).get('data',{}).get('access_token',''))")
+
+--- 5a. Create OPPORTUNITY ---
+
+curl -s -X POST "http://localhost:5000/api/posts" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $ACCESS" \
+  -d '{
+    "type":"OPPORTUNITY",
+    "title":"Seed funding for African startups",
+    "description":"Offering seed funding up to $50k for early-stage startups."
+  }' | python3 -m json.tool
+
+--- 5b. Create UPDATE ---
+
+curl -s -X POST "http://localhost:5000/api/posts" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $ACCESS" \
+  -d '{
+    "type":"UPDATE",
+    "title":"Just launched our platform!",
+    "description":"After months of building, we finally launched!"
+  }' | python3 -m json.tool
+
+--- 5c. Create DEAL ---
+
+curl -s -X POST "http://localhost:5000/api/posts" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $ACCESS" \
+  -d '{
+    "type":"DEAL",
+    "title":"Discount for Luxrear members",
+    "description":"20% off on business registration services."
+  }' | python3 -m json.tool
+
+--- 5d. Create ANNOUNCEMENT ---
+
+curl -s -X POST "http://localhost:5000/api/posts" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $ACCESS" \
+  -d '{
+    "type":"ANNOUNCEMENT",
+    "title":"Networking event this Friday",
+    "description":"Join us for our monthly networking event."
+  }' | python3 -m json.tool
+
+--- 5e. Get Feed (all posts) ---
+
+curl -s "http://localhost:5000/api/posts" \
+  -H "Authorization: Bearer $ACCESS" | python3 -m json.tool
+
+--- 5f. Get Single Post (replace POST_ID) ---
+
+curl -s "http://localhost:5000/api/posts/POST_ID" \
+  -H "Authorization: Bearer $ACCESS" | python3 -m json.tool
+
+--- 5g. Update a Post (owner only, replace POST_ID) ---
+
+curl -s -X PUT "http://localhost:5000/api/posts/POST_ID" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $ACCESS" \
+  -d '{
+    "title":"Updated title",
+    "description":"Updated description"
+  }' | python3 -m json.tool
+
+--- 5h. Delete a Post (owner only, replace POST_ID) ---
+
+curl -s -X DELETE "http://localhost:5000/api/posts/POST_ID" \
+  -H "Authorization: Bearer $ACCESS" | python3 -m json.tool
+
+--- 5i. Get My Posts ---
+
+curl -s "http://localhost:5000/api/posts/my" \
+  -H "Authorization: Bearer $ACCESS" | python3 -m json.tool
+
+--- 5j. Upload Post Image (replace POST_ID and path) ---
+
+curl -s -X POST "http://localhost:5000/api/posts/POST_ID/image" \
+  -H "Authorization: Bearer $ACCESS" \
+  -F "image=@/path/to/image.jpg" | python3 -m json.tool
+
+
+=============================================================================
+ DAY 6 — BUSINESS EXCHANGE
+=============================================================================
+
+--- Login ---
+
+ACCESS=$(curl -s -X POST "http://localhost:5000/api/auth/login" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email":"john_123@test.com",
+    "password":"StrongPass1!"
+  }' | python3 -c "import sys,json; print(json.load(sys.stdin).get('data',{}).get('access_token',''))")
+
+--- 6a. NEED_HELP ---
+
+curl -s -X POST "http://localhost:5000/api/posts" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $ACCESS" \
+  -d '{
+    "type":"NEED_HELP",
+    "title":"Need logistics partner in Ghana",
+    "description":"Looking for reliable logistics in Accra."
+  }' | python3 -m json.tool
+
+--- 6b. INVESTMENT ---
+
+curl -s -X POST "http://localhost:5000/api/posts" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $ACCESS" \
+  -d '{
+    "type":"INVESTMENT",
+    "title":"Co-investors for Lagos property",
+    "description":"Looking for co-investors for a commercial property in VI."
+  }' | python3 -m json.tool
+
+--- 6c. PARTNERSHIP ---
+
+curl -s -X POST "http://localhost:5000/api/posts" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $ACCESS" \
+  -d '{
+    "type":"PARTNERSHIP",
+    "title":"Tech partner for fintech solution",
+    "description":"Seeking a tech partner to build a mobile payment solution."
+  }' | python3 -m json.tool
+
+--- 6d. SUPPLIER_REQUEST ---
+
+curl -s -X POST "http://localhost:5000/api/posts" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $ACCESS" \
+  -d '{
+    "type":"SUPPLIER_REQUEST",
+    "title":"Organic coffee suppliers needed",
+    "description":"Need reliable coffee bean suppliers from Ethiopia."
+  }' | python3 -m json.tool
+
+--- 6e. BUSINESS_OFFER ---
+
+curl -s -X POST "http://localhost:5000/api/posts" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $ACCESS" \
+  -d '{
+    "type":"BUSINESS_OFFER",
+    "title":"Digital marketing for SMEs",
+    "description":"Affordable marketing packages for small businesses."
+  }' | python3 -m json.tool
+
+--- 6f. JOB ---
+
+curl -s -X POST "http://localhost:5000/api/posts" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $ACCESS" \
+  -d '{
+    "type":"JOB",
+    "title":"Senior React developer",
+    "description":"Remote. 3+ years React experience required."
+  }' | python3 -m json.tool
+
+--- 6g. Filter Exchange posts ---
+
+curl -s "http://localhost:5000/api/posts?type=NEED_HELP,INVESTMENT,PARTNERSHIP" \
+  -H "Authorization: Bearer $ACCESS" | python3 -m json.tool
+
+
+=============================================================================
+ DAY 7 — COMMUNITY DISCUSSION BOARDS (Comments + Reactions)
+=============================================================================
+
+--- Login ---
+
+ACCESS=$(curl -s -X POST "http://localhost:5000/api/auth/login" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email":"john_123@test.com",
+    "password":"StrongPass1!"
+  }' | python3 -c "import sys,json; print(json.load(sys.stdin).get('data',{}).get('access_token',''))")
+
+--- 7a. Create a comment on a post (replace POST_ID) ---
+
+curl -s -X POST "http://localhost:5000/api/comments" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $ACCESS" \
+  -d '{"post_id":"POST_ID","content":"Great post! Would love to connect."}' | python3 -m json.tool
+
+--- 7b. Reply to a comment (replace POST_ID and PARENT_ID) ---
+
+curl -s -X POST "http://localhost:5000/api/comments" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $ACCESS" \
+  -d '{"post_id":"POST_ID","content":"I agree! Let me know more.","parent_id":"PARENT_ID"}' | python3 -m json.tool
+
+--- 7c. Get comments for a post (replace POST_ID) ---
+
+curl -s "http://localhost:5000/api/comments?post_id=POST_ID&page=1&limit=20" \
+  -H "Authorization: Bearer $ACCESS" | python3 -m json.tool
+
+--- 7d. React to a post (replace POST_ID, types: like|love|insightful|support) ---
+
+curl -s -X POST "http://localhost:5000/api/reactions" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $ACCESS" \
+  -d '{"post_id":"POST_ID","type":"like"}' | python3 -m json.tool
+
+--- 7e. Get reactions for a post (replace POST_ID) ---
+
+curl -s "http://localhost:5000/api/reactions?post_id=POST_ID" \
+  -H "Authorization: Bearer $ACCESS" | python3 -m json.tool
+
+--- 7f. Toggle reaction (same type = remove, different type = update) ---
+
+curl -s -X POST "http://localhost:5000/api/reactions" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $ACCESS" \
+  -d '{"post_id":"POST_ID","type":"love"}' | python3 -m json.tool
+
+
+=============================================================================
+ DAY 8 — LEARNING SECTION
+=============================================================================
+
+--- Login ---
+
+ACCESS=$(curl -s -X POST "http://localhost:5000/api/auth/login" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email":"john_123@test.com",
+    "password":"StrongPass1!"
+  }' | python3 -c "import sys,json; print(json.load(sys.stdin).get('data',{}).get('access_token',''))")
+
+--- 8a. Create LEARNING post (with optional video_url) ---
+
+curl -s -X POST "http://localhost:5000/api/posts" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $ACCESS" \
+  -d '{
+    "type":"LEARNING",
+    "title":"5 Steps to Scale Your Business in Africa",
+    "description":"Key strategies for scaling across African markets.",
+    "video_url":"https://youtube.com/watch?v=example",
+    "tags":["scaling","business-growth"]
+  }' | python3 -m json.tool
+
+--- 8b. Create another LEARNING post ---
+
+curl -s -X POST "http://localhost:5000/api/posts" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $ACCESS" \
+  -d '{
+    "type":"LEARNING",
+    "title":"Understanding Export Regulations",
+    "description":"Guide to exporting goods from Nigeria.",
+    "tags":["export","trade"]
+  }' | python3 -m json.tool
+
+--- 8c. Filter LEARNING posts ---
+
+curl -s "http://localhost:5000/api/posts?type=LEARNING" \
+  -H "Authorization: Bearer $ACCESS" | python3 -m json.tool
+
+--- 8d. View Learning categories ---
+
+curl -s "http://localhost:5000/api/categories?type=learning" | python3 -m json.tool
+
+--- 8e. View ALL categories ---
+
+curl -s "http://localhost:5000/api/categories" | python3 -m json.tool
+
+
+=============================================================================
+ DAY 9 — DIASPORA HUB & SUPPORT BOARD
+=============================================================================
+
+--- Login ---
+
+ACCESS=$(curl -s -X POST "http://localhost:5000/api/auth/login" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email":"john_123@test.com",
+    "password":"StrongPass1!"
+  }' | python3 -c "import sys,json; print(json.load(sys.stdin).get('data',{}).get('access_token',''))")
+
+--- 9a. DIASPORA_PARTNER ---
+
+curl -s -X POST "http://localhost:5000/api/posts" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $ACCESS" \
+  -d '{
+    "type":"DIASPORA_PARTNER",
+    "title":"UK-based looking for Lagos partners",
+    "description":"Looking for reliable tech partners in Lagos.",
+    "location":"Lagos",
+    "tags":["uk-diaspora","tech"]
+  }' | python3 -m json.tool
+
+--- 9b. DIASPORA_INVESTOR ---
+
+curl -s -X POST "http://localhost:5000/api/posts" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $ACCESS" \
+  -d '{
+    "type":"DIASPORA_INVESTOR",
+    "title":"US investor seeking agribusiness",
+    "description":"Looking for agribusiness ventures in West Africa.",
+    "location":"Nigeria",
+    "tags":["us-diaspora","agriculture"]
+  }' | python3 -m json.tool
+
+--- 9c. Filter Diaspora Posts ---
+
+curl -s "http://localhost:5000/api/posts?type=DIASPORA_PARTNER,DIASPORA_INVESTOR" \
+  -H "Authorization: Bearer $ACCESS" | python3 -m json.tool
+
+--- 9d. SUPPORT_REQUEST ---
+
+curl -s -X POST "http://localhost:5000/api/posts" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $ACCESS" \
+  -d '{
+    "type":"SUPPORT_REQUEST",
+    "title":"Need legal advice for registration",
+    "description":"Help understanding business registration in Nigeria.",
+    "tags":["legal","registration"]
+  }' | python3 -m json.tool
+
+--- 9e. Filter Support Requests ---
+
+curl -s "http://localhost:5000/api/posts?type=SUPPORT_REQUEST" \
+  -H "Authorization: Bearer $ACCESS" | python3 -m json.tool
+
+--- 9f. Update profile for diaspora visibility ---
+
+curl -s -X PUT "http://localhost:5000/api/profiles/me" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $ACCESS" \
+  -d '{
+    "origin_country":"Nigeria",
+    "current_country":"Nigeria",
+    "show_in_diaspora":true
+  }' | python3 -m json.tool
+
+--- 9g. View diaspora profiles (filter by diaspora=true) ---
+
+curl -s "http://localhost:5000/api/profiles?diaspora=true" \
+  -H "Authorization: Bearer $ACCESS" | python3 -m json.tool
+
+--- 9h. Expert response on support request (uses comment system) ---
+
+curl -s -X POST "http://localhost:5000/api/comments" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $ACCESS" \
+  -d '{"post_id":"SUPPORT_POST_ID","content":"I can help. Contact me for more details."}' | python3 -m json.tool
+
+
+=============================================================================
+ DAY 10 — NOTIFICATIONS & ADMIN PANEL
+ ⚠ NOT BUILT YET
+=============================================================================
+
+--- When built, commands will be like: ---
+
+# Get my notifications:
+# curl -s "http://localhost:5000/api/notifications" -H "Authorization: Bearer $ACCESS"
+
+# Mark notification as read:
+# curl -s -X PATCH "http://localhost:5000/api/notifications/NOTIF_ID/read" \
+#   -H "Authorization: Bearer $ACCESS"
+
+# Report a post:
+# curl -s -X POST "http://localhost:5000/api/reports" \
+#   -H "Content-Type: application/json" \
+#   -H "Authorization: Bearer $ACCESS" \
+#   -d '{"post_id":"POST_ID","reason":"spam","description":"This looks like spam."}'
+
+# Admin: list users:
+# curl -s "http://localhost:5000/api/admin/users" -H "Authorization: Bearer ADMIN_TOKEN"
+
+# Admin: ban a user:
+# curl -s -X PATCH "http://localhost:5000/api/admin/users/USER_ID/ban" \
+#   -H "Authorization: Bearer ADMIN_TOKEN"
+
+# Admin: verify a member:
+# curl -s -X PATCH "http://localhost:5000/api/admin/users/USER_ID/verify" \
+#   -H "Authorization: Bearer ADMIN_TOKEN"
+
+# Admin: feature a post:
+# curl -s -X PATCH "http://localhost:5000/api/admin/posts/POST_ID/feature" \
+#   -H "Authorization: Bearer ADMIN_TOKEN"
+
+# Admin: resolve a report:
+# curl -s -X PATCH "http://localhost:5000/api/admin/reports/REPORT_ID/resolve" \
+#   -H "Authorization: Bearer ADMIN_TOKEN"

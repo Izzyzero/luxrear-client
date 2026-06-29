@@ -69,7 +69,7 @@ router.delete('/me/picture', removeProfilePicture);
 
 // ── Browse profiles ───────────────────────────
 
-// GET /api/profiles?industry=Tech&country=Nigeria&page=1&limit=20
+// GET /api/profiles?industry=Tech&country=Nigeria&diaspora=true&page=1&limit=20
 router.get(
   '/',
   [
@@ -81,6 +81,10 @@ router.get(
       .optional()
       .isInt({ min: 1, max: 100 })
       .withMessage('Limit must be between 1 and 100'),
+    query('diaspora')
+      .optional()
+      .isIn(['true', 'false'])
+      .withMessage('Diaspora must be true or false'),
   ],
   validate,
   getAllProfiles
