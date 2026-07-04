@@ -1,7 +1,9 @@
 import Comment from '../models/Comment.js';
 import Post from '../models/Post.js';
 import Profile from '../models/Profile.js';
+import User from '../models/User.js';
 import { successResponse, errorResponse, paginatedResponse } from '../utils/apiResponse.js';
+import { createNotification } from '../utils/notificationService.js';
 
 export const createComment = async (req, res, next) => {
   try {
@@ -37,6 +39,21 @@ export const createComment = async (req, res, next) => {
     await Post.findByIdAndUpdate(post_id, { $inc: { comment_count: 1 } });
 
     await comment.populate('profile_id', 'full_name business_name profile_picture');
+
+    // Notify post owner
+    const postOwnerProfile = await Profile.findById(post.profile_id);
+    if (postOwnerProfile && postOwnerProfile.user_id.toString() !== req.user._id.toString()) {
+      const postOwner = await User.findById(postOwnerProfile.user_id);
+      if (postOwner) {
+        await createNotification({
+          user_id: postOwner._id,
+          type: parent_id ? 'comment_reply' : 'post_comment',
+          message: `${profile.full_name || 'A member'} ${parent_id ? 'replied to a comment on' : 'commented on'} your post: "${post.title.substring(0, 50)}"`,
+          reference_id: comment._id,
+          reference_type: 'Comment',
+        });
+      }
+    }
 
     return successResponse(res, 201, 'Comment created.', { comment });
   } catch (error) {
