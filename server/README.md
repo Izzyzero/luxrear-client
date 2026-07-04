@@ -1,647 +1,54 @@
-# LUXREAR Business Club — Backend API
+# LUXREAR Business Club — Backend API (Days 1–10)
 
-> Private business network for African entrepreneurs and diaspora professionals.
+> Private business network API built over 10 days. Each day adds a new module.
+> Base URL: `http://localhost:5000/api`
+
+---
+
+## Table of Contents
+
+- [Quick Start](#quick-start)
+- [Project Structure](#project-structure)
+- [MongoDB Architecture](#mongodb-architecture)
+- [Auth & Response Format](#auth--response-format)
+- [Day 3: Auth System](#day-3-auth-system)
+- [Day 4: Member Profile](#day-4-member-profile)
+- [Day 5: Posts & Categories](#day-5-posts--categories)
+- [Day 6: Business Exchange](#day-6-business-exchange)
+- [Day 7: Comments & Reactions](#day-7-comments--reactions)
+- [Day 8: Learning Section](#day-8-learning-section)
+- [Day 9: Diaspora Hub & Support Board](#day-9-diaspora-hub--support-board)
+- [Day 10: Connections, Notifications & Admin](#day-10-connections-notifications--admin)
+- [Testing Your API](#testing-your-api)
+- [Error Codes](#error-codes)
 
 ---
 
 ## Quick Start
 
 ```bash
-# 1. Install dependencies
 npm install
-
-# 2. Create .env file (see .env.example)
-cp .env.example .env
-# Fill in your values: PORT, MONGODB_URI, JWT secrets, Cloudinary credentials
-
-# 3. Start the server
-npm run dev
+cp .env.example .env    # Fill in your credentials
+npm run dev             # → http://localhost:5000
 ```
 
-Server runs on `http://localhost:5000` by default.
-
----
-
-## API Base URL
-
-```
-http://localhost:5000/api
-```
-
-All endpoints below are relative to this base URL.
-
----
-
-## Authentication
-
-Most endpoints require a JWT access token. Include it in the `Authorization` header:
-
-```
-Authorization: Bearer <access_token>
-```
-
-You get the access token from the `/auth/register` or `/auth/login` response.
-
----
-
-## User Journey (Frontend Flow)
-
-The frontend should guide users through this sequence automatically:
-
-```
-1. Register → POST /auth/register
-   ↓ (onboarding_complete: false)
-2. Onboarding → PATCH /auth/onboarding
-   ↓ (onboarding_complete: true)
-3. Profile Setup → PUT /profiles/me
-   ↓
-4. Upload Photo → POST /profiles/me/picture
-   ↓
-5. Home Feed → GET /posts (coming soon)
-```
-
-**How to check:** After login, check `user.onboarding_complete`:
-- `false` → redirect to onboarding page
-- `true` → redirect to home feed
-
----
-
-## Response Format
-
-All responses follow this structure:
-
-### Success
-```json
-{
-  "success": true,
-  "message": "Description of what happened.",
-  "data": { ... }
-}
-```
-
-### Paginated
-```json
-{
-  "success": true,
-  "message": "Items fetched.",
-  "data": [ ... ],
-  "pagination": {
-    "page": 1,
-    "limit": 20,
-    "total": 50,
-    "pages": 3
-  }
-}
-```
-
-### Error
-```json
-{
-  "success": false,
-  "message": "Error description.",
-  "errors": [ ... ]   // only for validation errors
-}
-```
-
----
-
-## Auth Endpoints
-
-### POST /auth/register
-
-Create a new account. A profile is automatically created with `full_name`.
-
-**Body:**
-```json
-{
-  "full_name": "John Doe",          // required
-  "email": "john@example.com",      // required if no phone
-  "phone": "08012345678",           // required if no email
-  "password": "Password123"         // min 8 chars, must have uppercase, lowercase, and number
-}
-```
-
-**Response (201):**
-```json
-{
-  "success": true,
-  "message": "Account created. Please verify your email.",
-  "data": {
-    "access_token": "eyJhbG...",
-    "refresh_token": "eyJhbG...",
-    "user": {
-      "id": "6856...",
-      "email": "john@example.com",
-      "phone": null,
-      "role": "founder",
-      "is_verified": false,
-      "onboarding_complete": false
-    }
-  }
-}
-```
-
-**Validation errors (400):**
-- `full_name` is required
-- Either `email` or `phone` is required
-- `password` must be at least 8 characters with uppercase, lowercase, and number
-- Email must be valid format
-- Phone must be valid mobile number
-
-**Conflict (409):**
-- Email or phone already registered
-
----
-
-### POST /auth/login
-
-Login with email or phone + password.
-
-**Body:**
-```json
-{
-  "email": "john@example.com",    // or use "phone": "08012345678"
-  "password": "Password123"
-}
-```
-
-**Response (200):**
-```json
-{
-  "success": true,
-  "message": "Login successful.",
-  "data": {
-    "access_token": "eyJhbG...",
-    "refresh_token": "eyJhbG...",
-    "user": {
-      "id": "6856...",
-      "email": "john@example.com",
-      "phone": null,
-      "role": "founder",
-      "is_verified": false,
-      "onboarding_complete": false
-    }
-  }
-}
-```
-
-**Error (401):** Invalid credentials
-**Error (403):** Account has been banned
-
----
-
-### POST /auth/refresh
-
-Get a new access token using your refresh token.
-
-**Body:**
-```json
-{
-  "refresh_token": "eyJhbG..."
-}
-```
-
-**Response (200):**
-```json
-{
-  "success": true,
-  "message": "Token refreshed.",
-  "data": {
-    "access_token": "eyJhbG..."    // new access token
-  }
-}
-```
-
----
-
-### POST /auth/logout 🔒
-
-Invalidate the refresh token. Requires authentication.
-
-**Headers:** `Authorization: Bearer <access_token>`
-
-**Response (200):**
-```json
-{
-  "success": true,
-  "message": "Logged out successfully."
-}
-```
-
-> **Note:** The access token remains valid until it expires (15 min by default). For full logout, the frontend should also delete the stored tokens on the client side.
-
----
-
-### GET /auth/verify-email?token=xxx
-
-Verify a user's email address. Usually opened from a link in the verification email.
-
-**Query params:** `token` (required)
-
-**Response (200):**
-```json
-{
-  "success": true,
-  "message": "Email verified successfully."
-}
-```
-
----
-
-### POST /auth/forgot-password
-
-Request a password reset link sent to the user's email.
-
-**Body:**
-```json
-{
-  "email": "john@example.com"
-}
-```
-
-**Response (200):** Always returns success (prevents email enumeration):
-```json
-{
-  "success": true,
-  "message": "If that email exists, a reset link has been sent."
-}
-```
-
----
-
-### PATCH /auth/reset-password
-
-Reset password using the token from the reset email.
-
-**Body:**
-```json
-{
-  "token": "abc123...",
-  "password": "NewPassword123"     // min 8 chars, uppercase, lowercase, number
-}
-```
-
-**Response (200):**
-```json
-{
-  "success": true,
-  "message": "Password reset successful. Please log in."
-}
-```
-
----
-
-### PATCH /auth/change-password 🔒
-
-Change password while logged in (requires current password).
-
-**Headers:** `Authorization: Bearer <access_token>`
-
-**Body:**
-```json
-{
-  "current_password": "OldPassword123",
-  "new_password": "NewPassword456"    // min 8 chars, uppercase, lowercase, number
-}
-```
-
-**Response (200):**
-```json
-{
-  "success": true,
-  "message": "Password updated successfully."
-}
-```
-
----
-
-### PATCH /auth/onboarding 🔒
-
-Complete onboarding (set country, business type, and role).
-
-**Headers:** `Authorization: Bearer <access_token>`
-
-**Body:**
-```json
-{
-  "country": "Nigeria",
-  "business_type": "Retail",
-  "role": "founder"              // must be: founder, investor, service_provider, or student
-}
-```
-
-**Response (200):**
-```json
-{
-  "success": true,
-  "message": "Onboarding complete.",
-  "data": {
-    "user": {
-      "id": "6856...",
-      "role": "founder",
-      "country": "Nigeria",
-      "business_type": "Retail",
-      "onboarding_complete": true
-    }
-  }
-}
-```
-
----
-
-### GET /auth/me 🔒
-
-Get the current authenticated user with their profile.
-
-**Headers:** `Authorization: Bearer <access_token>`
-
-**Response (200):**
-```json
-{
-  "success": true,
-  "message": "Current user fetched.",
-  "data": {
-    "user": {
-      "id": "6856...",
-      "email": "john@example.com",
-      "phone": null,
-      "role": "founder",
-      "country": "Nigeria",
-      "business_type": "Retail",
-      "is_verified": false,
-      "onboarding_complete": true,
-      "created_at": "2026-06-22T..."
-    },
-    "profile": {
-      "_id": "6856...",
-      "user_id": "6856...",
-      "full_name": "John Doe",
-      "business_name": null,
-      "profile_picture": null,
-      "description": null,
-      "industry": null,
-      "location": null,
-      "services": [],
-      "origin_country": null,
-      "current_country": null,
-      "show_in_diaspora": false,
-      "website": null,
-      "linkedin": null,
-      "whatsapp": null,
-      "created_at": "2026-06-22T...",
-      "updated_at": "2026-06-22T..."
-    }
-  }
-}
-```
-
----
-
-## Profile Endpoints
-
-All profile endpoints require authentication.
-
-**Headers:** `Authorization: Bearer <access_token>`
-
----
-
-### GET /profiles/me
-
-Get your own profile.
-
-**Response (200):**
-```json
-{
-  "success": true,
-  "message": "Profile fetched.",
-  "data": {
-    "profile": {
-      "_id": "6856...",
-      "user_id": "6856...",
-      "full_name": "John Doe",
-      "business_name": null,
-      "profile_picture": null,
-      "description": null,
-      "industry": null,
-      "location": null,
-      "services": [],
-      "origin_country": null,
-      "current_country": null,
-      "show_in_diaspora": false,
-      "website": null,
-      "linkedin": null,
-      "whatsapp": null,
-      "created_at": "...",
-      "updated_at": "..."
-    }
-  }
-}
-```
-
----
-
-### PUT /profiles/me
-
-Update your profile. Send only the fields you want to change.
-
-**Body (all fields optional):**
-```json
-{
-  "full_name": "John Doe",
-  "business_name": "Doe Enterprises",
-  "description": "Building the future of African trade",
-  "industry": "Tech",
-  "location": "Lagos, Nigeria",
-  "services": ["Consulting", "Import/Export"],
-  "origin_country": "Nigeria",
-  "current_country": "Ghana",
-  "show_in_diaspora": true,
-  "website": "https://doe.com",
-  "linkedin": "johndoe",
-  "whatsapp": "+2348012345678"
-}
-```
-
-**Validation:**
-- `full_name` — max 100 chars, cannot be empty
-- `business_name` — max 150 chars
-- `description` — max 1000 chars
-- `services` — must be an array of strings
-- `show_in_diaspora` — must be boolean (true/false)
-- `website` — must be a valid URL
-
-**Response (200):**
-```json
-{
-  "success": true,
-  "message": "Profile updated.",
-  "data": {
-    "profile": { ... updated profile ... }
-  }
-}
-```
-
----
-
-### POST /profiles/me/picture
-
-Upload a profile picture. Sends image to Cloudinary.
-
-**Content-Type:** `multipart/form-data`
-
-**Body:** `profile_picture` (image file: jpg, jpeg, png, webp, max 5MB)
-
-**Response (200):**
-```json
-{
-  "success": true,
-  "message": "Profile picture uploaded.",
-  "data": {
-    "profile_picture": "https://res.cloudinary.com/.../luxrear/profiles/abc123.jpg",
-    "profile": { ... updated profile ... }
-  }
-}
-```
-
----
-
-### DELETE /profiles/me/picture
-
-Remove your profile picture.
-
-**Response (200):**
-```json
-{
-  "success": true,
-  "message": "Profile picture removed.",
-  "data": {
-    "profile": { ... profile with picture set to null ... }
-  }
-}
-```
-
----
-
-### GET /profiles?page=1&limit=20&industry=Tech&country=Nigeria
-
-Browse all profiles with pagination and filters.
-
-**Query params (all optional):**
-| Param | Type | Default | Description |
-|-------|------|---------|-------------|
-| `page` | number | 1 | Page number |
-| `limit` | number | 20 | Items per page (max 100) |
-| `industry` | string | — | Filter by industry (case-insensitive, partial match) |
-| `country` | string | — | Filter by location/country (case-insensitive, partial match) |
-
-**Response (200):**
-```json
-{
-  "success": true,
-  "message": "Profiles fetched.",
-  "data": [ ... array of profiles ... ],
-  "pagination": {
-    "page": 1,
-    "limit": 20,
-    "total": 50,
-    "pages": 3
-  }
-}
-```
-
----
-
-### GET /profiles/:id
-
-Get a single profile by its ID.
-
-**URL:** `/profiles/6856abc123...`
-
-**Response (200):**
-```json
-{
-  "success": true,
-  "message": "Profile fetched.",
-  "data": {
-    "profile": { ... }
-  }
-}
-```
-
-**Error (400):** Invalid profile ID
-**Error (404):** Profile not found
-
----
-
-## Coming Soon (Not Yet Built)
-
-These endpoints are planned but not yet implemented:
-
-| Module | Endpoints | Status |
-|--------|-----------|--------|
-| Posts (Feed, Exchange, Learning, Community, Diaspora, Support) | CRUD + filters | 🔜 Day 5-9 |
-| Comments | CRUD, nested replies | 🔜 Day 7 |
-| Reactions | Like/Love/Insightful/Support | 🔜 Day 7 |
-| Connections | Send/Accept/Reject/Block | 🔜 Day 9 |
-| Notifications | List, Mark read | 🔜 Day 10 |
-| Categories | List by type | 🔜 Day 5 |
-| Admin | Ban/Verify users, Moderate posts | 🔜 Day 10 |
-
----
-
-## Error Handling
-
-All errors return this format:
-
-```json
-{
-  "success": false,
-  "message": "Error description."
-}
-```
-
-Validation errors include details:
-
-```json
-{
-  "success": false,
-  "message": "Validation failed.",
-  "errors": [
-    { "field": "email", "message": "Invalid email address" },
-    { "field": "password", "message": "Password must be at least 8 characters" }
-  ]
-}
-```
-
-**Common HTTP status codes:**
-| Code | Meaning |
-|------|---------|
-| 400 | Bad request / validation error |
-| 401 | Not authenticated / invalid credentials |
-| 403 | Forbidden / banned account |
-| 404 | Not found |
-| 409 | Conflict (duplicate email/phone) |
-| 500 | Server error |
-
----
-
-## Rate Limiting
-
-- **Global:** 200 requests per 15 minutes
-- **Auth endpoints** (login, register, forgot-password): 20 requests per 15 minutes (200 in development)
-
----
-
-## Tech Stack
-
-| Layer | Technology |
-|-------|-----------|
-| Runtime | Node.js |
-| Framework | Express.js |
-| Database | MongoDB Atlas |
-| File Storage | Cloudinary |
-| Auth | JWT (access + refresh tokens) |
-| Validation | express-validator |
+### Environment Variables (.env)
+
+| Variable | Description |
+|----------|-------------|
+| `PORT` | Server port (default: 5000) |
+| `MONGODB_URI` | MongoDB Atlas connection string |
+| `JWT_SECRET` | Secret for access tokens |
+| `JWT_REFRESH_SECRET` | Secret for refresh tokens |
+| `JWT_EXPIRES_IN` | Access token expiry (default: 24h) |
+| `JWT_REFRESH_EXPIRES_IN` | Refresh token expiry (default: 7d) |
+| `CLIENT_URL` | Frontend URL for CORS (default: http://localhost:5173) |
+| `CLOUDINARY_CLOUD_NAME` | Cloudinary cloud name |
+| `CLOUDINARY_API_KEY` | Cloudinary API key |
+| `CLOUDINARY_API_SECRET` | Cloudinary API secret |
+| `SMTP_HOST` / `SMTP_PORT` / `SMTP_USER` / `SMTP_PASS` | Email sending |
+| `EMAIL_FROM` | Sender email address |
+| `NODE_ENV` | `development` or `production` |
 
 ---
 
@@ -650,13 +57,484 @@ Validation errors include details:
 ```
 server/
 ├── src/
-│   ├── config/          # Database & Cloudinary config
-│   ├── controllers/     # Route handlers
-│   ├── middleware/       # Auth, validation, upload, error handler
-│   ├── models/          # Mongoose schemas (9 collections)
-│   ├── routes/          # Express route definitions
-│   └── utils/           # JWT, email, API response helpers
-├── .env.example         # Environment variable template
+│   ├── config/
+│   │   ├── db.js                  # MongoDB connection
+│   │   └── cloudinary.js          # Cloudinary configuration
+│   ├── controllers/
+│   │   ├── authController.js      # Day 3: Register, login, tokens, password mgmt
+│   │   ├── profileController.js   # Day 4: Profile CRUD + picture upload
+│   │   ├── postController.js      # Day 5: Posts CRUD + feed with filters
+│   │   ├── categoryController.js  # Day 5: Category listing by type
+│   │   ├── commentController.js   # Day 7: Nested comments + notification trigger
+│   │   ├── reactionController.js  # Day 7: Toggle reactions + notification trigger
+│   │   ├── connectionController.js# Day 10: Send/accept/list connections
+│   │   ├── notificationController.js# Day 10: User notification management
+│   │   └── adminController.js     # Day 10: User/post/report moderation
+│   ├── middleware/
+│   │   ├── auth.js                # JWT verification + role-based access
+│   │   ├── validate.js            # Validates express-validator results
+│   │   ├── upload.js              # Multer + Cloudinary image upload
+│   │   └── errorHandler.js        # Global error handler
+│   ├── models/                    # 9 Mongoose schemas
+│   │   ├── User.js                # email/phone, password, role, verification
+│   │   ├── Profile.js             # 1:1 with User: name, business, diaspora fields
+│   │   ├── Category.js            # Filter taxonomy (community/learning/exchange)
+│   │   ├── Post.js                # 14 types across all sections
+│   │   ├── Comment.js             # 1-level nesting via parent_id
+│   │   ├── Reaction.js            # like/love/insightful/support on post/comment
+│   │   ├── Connection.js          # requester ↔ receiver with status
+│   │   ├── Notification.js        # 9 types with read tracking
+│   │   └── Report.js              # Content moderation reports
+│   ├── routes/
+│   │   ├── index.js               # Route aggregator
+│   │   ├── authRoutes.js          # 12 endpoints
+│   │   ├── profileRoutes.js       # 6 endpoints
+│   │   ├── postRoutes.js          # 7 endpoints
+│   │   ├── categoryRoutes.js      # 3 endpoints
+│   │   ├── commentRoutes.js       # 6 endpoints
+│   │   ├── reactionRoutes.js      # 2 endpoints
+│   │   ├── connectionRoutes.js    # 5 endpoints
+│   │   ├── notificationRoutes.js  # 4 endpoints
+│   │   └── adminRoutes.js         # 10 endpoints
+│   └── utils/
+│       ├── jwt.js                 # Token generation + verification
+│       ├── email.js               # Email sending (verification, password reset)
+│       ├── apiResponse.js         # Standardized response helpers
+│       ├── seedCategories.js      # Auto-seeds DB with categories on startup
+│       └── notificationService.js # Reusable notification creation helper
+├── test-api.sh                    # Automated test suite (all 50+ tests)
+├── curl-reference.sh              # Copy-pasteable curl examples
+├── .env.example
 ├── package.json
-└── README.md            # This file
+└── README.md
 ```
+
+---
+
+## MongoDB Architecture
+
+### 9 Collections
+
+```
+users ──────────────────── 1:1 ──── profiles
+  │                                      │
+  │                                      │
+  ├── posts (profile_id) ◄───────────────┘
+  │     │
+  │     ├── comments (post_id)
+  │     │     └── parent_id (1-level nesting)
+  │     │
+  │     └── reactions (post_id or comment_id)
+  │
+  ├── connections (requester_id, receiver_id)
+  │
+  ├── notifications (user_id)
+  │
+  ├── reports (post_id, comment_id, profile_id)
+  │
+  └── categories (standalone taxonomy)
+```
+
+---
+
+## Auth & Response Format
+
+### 🔒 Auth Required
+
+Endpoints marked with 🔒 require a Bearer token:
+
+```bash
+Authorization: Bearer <access_token>
+```
+
+### Response Format
+
+**Success:**
+```json
+{ "success": true, "message": "...", "data": { ... } }
+```
+
+**Paginated:**
+```json
+{ "success": true, "message": "...", "data": [ ... ], "pagination": { "page": 1, "limit": 20, "total": 50, "pages": 3 } }
+```
+
+**Error:**
+```json
+{ "success": false, "message": "Error description." }
+```
+
+**Validation Error:**
+```json
+{ "success": false, "message": "Validation failed.", "errors": [ { "field": "...", "message": "..." } ] }
+```
+
+### Role Enum
+
+`founder` | `investor` | `service_provider` | `student` | `admin`
+
+---
+
+## Day 3: Auth System
+
+### POST /auth/register
+
+Register a new user. Auto-creates a Profile with `full_name`.
+
+```json
+{ "full_name": "John Doe", "email": "john@example.com", "password": "Test1234!" }
+// OR phone-only: "phone": "+2348012345678"
+```
+
+**Response:** `201` — Returns `access_token`, `refresh_token`, user object.
+
+### POST /auth/login
+
+```json
+{ "email": "john@example.com", "password": "Test1234!" }
+// OR: { "phone": "+2348012345678", "password": "Test1234!" }
+```
+
+**Response:** `200` — Returns `access_token`, `refresh_token`, user object.
+
+### POST /auth/refresh
+
+Get a new access token using your refresh token.
+
+```json
+{ "refreshToken": "eyJhbG..." }
+```
+
+### POST /auth/logout 🔒
+
+Invalidates the refresh token (access token remains valid until expiry).
+
+### GET /auth/verify-email?token=xxx
+
+Verify email address via token from verification email.
+
+### POST /auth/forgot-password
+
+Always returns 200 (prevents email enumeration).
+
+```json
+{ "email": "john@example.com" }
+```
+
+### PATCH /auth/reset-password
+
+```json
+{ "token": "abc123...", "password": "NewPass1234!" }
+```
+
+### PATCH /auth/change-password 🔒
+
+```json
+{ "current_password": "OldPass123!", "new_password": "NewPass456!" }
+```
+
+### PATCH /auth/onboarding 🔒
+
+Sets country, business_type, and role. Sets `onboarding_complete: true`.
+
+```json
+{ "country": "Nigeria", "business_type": "Technology", "role": "founder" }
+```
+
+### GET /auth/me 🔒
+
+Returns the current user + their profile in one call.
+
+---
+
+## Day 4: Member Profile
+
+All 🔒. Base: `/profiles`
+
+### GET /profiles/me 🔒
+### PUT /profiles/me 🔒
+
+Update any profile fields:
+```json
+{ "full_name": "John Doe", "business_name": "Doe Ventures", "description": "Building...", "industry": "Tech", "location": "Lagos, Nigeria", "services": ["Consulting", "Import/Export"], "origin_country": "Nigeria", "current_country": "Ghana", "show_in_diaspora": true, "website": "https://example.com", "linkedin": "johndoe", "whatsapp": "+2348012345678" }
+```
+
+### POST /profiles/me/picture 🔒
+
+Content-Type: `multipart/form-data`. Field: `profile` (jpg/jpeg/png/webp, max 5MB).
+
+### DELETE /profiles/me/picture 🔒
+
+Removes profile picture.
+
+### GET /profiles?page=1&limit=20&industry=Tech&country=Nigeria 🔒
+
+Browse profiles with pagination + filters.
+
+### GET /profiles/:id 🔒
+
+Get single profile by ID.
+
+---
+
+## Day 5: Posts & Categories
+
+All 🔒. Base: `/posts` and `/categories`
+
+### Post Types (14 enums)
+
+| Section | Types |
+|---------|-------|
+| **Home Feed** | `OPPORTUNITY`, `UPDATE`, `DEAL`, `ANNOUNCEMENT` |
+| **Business Exchange** | `NEED_HELP`, `INVESTMENT`, `PARTNERSHIP`, `SUPPLIER_REQUEST`, `BUSINESS_OFFER`, `JOB` |
+| **Learning** | `LEARNING` |
+| **Support** | `SUPPORT_REQUEST` |
+| **Diaspora** | `DIASPORA_PARTNER`, `DIASPORA_INVESTOR` |
+
+### POST /posts 🔒
+
+```json
+{ "type": "OPPORTUNITY", "title": "Business opportunity", "description": "Looking for partners...", "category_id": "...", "video_url": "https://...", "location": "Lagos, Nigeria", "tags": ["retail", "lagos"] }
+```
+
+### GET /posts?page=1&limit=20&type=OPPORTUNITY&category=general-business&search=lagos&tags=retail,startup&location=Lagos&featured=true 🔒
+
+Paginated feed with filters. Featured posts sort first, then by newest.
+
+### GET /posts/:id 🔒
+### PUT /posts/:id 🔒 (owner only)
+### DELETE /posts/:id 🔒 (owner only)
+### GET /posts/my?page=1&limit=20 🔒 (current user's posts)
+### POST /posts/:id/image 🔒 (owner only, Cloudinary upload)
+
+### GET /categories?type=community|learning|exchange 🔒
+### GET /categories/:id 🔒
+
+---
+
+## Day 6: Business Exchange
+
+No new endpoints — the existing posts system handles exchange via type filter:
+
+```bash
+GET /posts?type=NEED_HELP        # Need Help posts
+GET /posts?type=INVESTMENT       # Investment opportunities
+GET /posts?type=PARTNERSHIP      # Partnership requests
+GET /posts?type=SUPPLIER_REQUEST # Supplier requests
+GET /posts?type=BUSINESS_OFFER   # Business offers
+GET /posts?type=JOB              # Job listings
+```
+
+---
+
+## Day 7: Comments & Reactions
+
+All 🔒. Base: `/comments` and `/reactions`
+
+### Comments
+
+| Endpoint | Description |
+|----------|-------------|
+| `POST /comments` | Create comment. Body: `{ post_id, content, parent_id? }` |
+| `GET /comments?post_id=xxx&page=1&limit=20` | Get comments for a post (top-level + nested replies) |
+| `GET /comments/:id` | Get single comment with its replies |
+| `PUT /comments/:id` | Update own comment |
+| `DELETE /comments/:id` | Delete own comment + its replies |
+
+**Comment nesting:** 1 level deep. Set `parent_id` for replies.
+
+### Reactions
+
+| Endpoint | Description |
+|----------|-------------|
+| `POST /reactions` | Toggle reaction. Body: `{ type, post_id?|comment_id? }` |
+| `GET /reactions?post_id=xxx` | Get reactions for a post |
+| `GET /reactions?comment_id=xxx` | Get reactions for a comment |
+
+**Reaction types:** `like` | `love` | `insightful` | `support`
+
+**Toggle logic:** Same type → removes it. Different type → updates it. New → creates it.
+
+### 🔔 Notification Triggers (auto-created)
+
+- **Comment on your post** → `post_comment` notification
+- **Reply to your comment** → `comment_reply` notification  
+- **Reaction on your post** → `post_reaction` notification
+
+---
+
+## Day 8: Learning Section
+
+No new endpoints — filter posts by type:
+
+```bash
+GET /posts?type=LEARNING&category=business-growth
+```
+
+Learning categories auto-seeded: `Business Growth`, `Sales & Marketing`, `Finance`, `Export/Trade`.
+
+---
+
+## Day 9: Diaspora Hub & Support Board
+
+No new endpoints — filter by type:
+
+```bash
+GET /posts?type=DIASPORA_PARTNER   # Diaspora partners
+GET /posts?type=DIASPORA_INVESTOR  # Diaspora investors
+GET /posts?type=SUPPORT_REQUEST    # Business support
+```
+
+---
+
+## Day 10: Connections, Notifications & Admin
+
+### Connections 🔒
+
+Base: `/connections`
+
+| Endpoint | Description |
+|----------|-------------|
+| `POST /connections` | Send request. Body: `{ receiver_id }` |
+| `GET /connections?status=pending&page=1&limit=20` | List your connections |
+| `GET /connections/pending` | Get pending requests sent to you |
+| `PATCH /connections/:id` | Accept/reject. Body: `{ status: "accepted"|"rejected" }` |
+| `DELETE /connections/:id` | Remove/disconnect |
+
+**🔔 Notification triggers:** `connection_request` on send, `connection_accepted` on accept.
+
+### Notifications 🔒
+
+Base: `/notifications`
+
+| Endpoint | Description |
+|----------|-------------|
+| `GET /notifications?page=1&limit=20&unread=true` | List your notifications (newest first, unread first) |
+| `PATCH /notifications/:id/read` | Mark one as read |
+| `PATCH /notifications/read-all` | Mark all as read |
+| `DELETE /notifications/:id` | Delete a notification |
+
+**Notification types:** `new_opportunity` | `post_comment` | `comment_reply` | `post_reaction` | `connection_request` | `connection_accepted` | `member_verified` | `post_featured` | `system`
+
+### Admin Panel 🔒 (admin role only)
+
+Base: `/admin`
+
+| Endpoint | Description |
+|----------|-------------|
+| `GET /admin/stats` | Dashboard stats (users, posts, reports, etc.) |
+| `GET /admin/users?page=1&limit=20&role=founder&is_verified=true&is_banned=false&search=john` | List/manage users |
+| `PATCH /admin/users/:id/ban` | Toggle ban (admins can't ban other admins) |
+| `PATCH /admin/users/:id/verify` | Toggle verification badge |
+| `GET /admin/posts?page=1&limit=20&is_flagged=true&type=OPPORTUNITY&search=keyword` | List all posts |
+| `PATCH /admin/posts/:id/flag` | Toggle flag (moderate content) |
+| `PATCH /admin/posts/:id/feature` | Toggle featured status |
+| `DELETE /admin/posts/:id` | Delete any post |
+| `GET /admin/reports?is_resolved=false` | View reports |
+| `PATCH /admin/reports/:id/resolve` | Mark report resolved |
+
+---
+
+## Testing Your API
+
+### Option 1: Automated Test Suite
+
+```bash
+cd server
+bash test-api.sh
+```
+
+This runs 50+ tests: registers users, creates posts (all 14 types), tests filters, pagination, comments (with nesting), reactions (toggle), connections, notifications, admin operations, validation errors, and auth checks.
+
+### Option 2: Curl Reference
+
+```bash
+cd server
+bash curl-reference.sh    # Interactive — setup once, then run any command
+```
+
+### Option 3: Test Individual Days
+
+```bash
+# Day 3 — Auth
+curl -s -X POST http://localhost:5000/api/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{"email":"test@example.com","password":"Test1234!","full_name":"Tester"}' | python3 -m json.tool
+
+# Day 4 — Profile
+curl -s http://localhost:5000/api/profiles/me \
+  -H "Authorization: Bearer $TOKEN" | python3 -m json.tool
+
+# Day 5 — Create a post
+curl -s -X POST http://localhost:5000/api/posts \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $TOKEN" \
+  -d '{"type":"OPPORTUNITY","title":"Test post","description":"Testing"}' | python3 -m json.tool
+
+# Day 7 — Comment on the post
+curl -s -X POST http://localhost:5000/api/comments \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $TOKEN" \
+  -d '{"post_id":"POST_ID","content":"Nice post!"}' | python3 -m json.tool
+
+# Day 7 — React to the post
+curl -s -X POST http://localhost:5000/api/reactions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $TOKEN" \
+  -d '{"type":"like","post_id":"POST_ID"}' | python3 -m json.tool
+
+# Day 10 — Send connection request
+curl -s -X POST http://localhost:5000/api/connections \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $TOKEN" \
+  -d '{"receiver_id":"OTHER_PROFILE_ID"}' | python3 -m json.tool
+
+# Day 10 — Check notifications
+curl -s http://localhost:5000/api/notifications \
+  -H "Authorization: Bearer $TOKEN" | python3 -m json.tool
+
+# Day 10 — Admin (requires admin role)
+curl -s http://localhost:5000/api/admin/stats \
+  -H "Authorization: Bearer $ADMIN_TOKEN" | python3 -m json.tool
+```
+
+---
+
+## Error Codes
+
+| Code | Meaning | Common Causes |
+|------|---------|---------------|
+| `400` | Bad Request | Validation errors, missing fields, invalid type |
+| `401` | Unauthorized | Missing/invalid/expired token |
+| `403` | Forbidden | Not the owner, banned account, not admin |
+| `404` | Not Found | Post/comment/user/profile doesn't exist |
+| `409` | Conflict | Duplicate email or phone |
+| `429` | Too Many Requests | Rate limit exceeded |
+| `500` | Server Error | Something went wrong on our end |
+
+---
+
+## Rate Limiting
+
+| Scope | Limit | Applies To |
+|-------|-------|------------|
+| **Global** | 200 req / 15 min | All endpoints |
+| **Auth** | 20 req / 15 min (200 in dev) | Login, register, forgot-password |
+
+---
+
+## Key Design Decisions
+
+1. **Single `posts` collection** powers Feed, Exchange, Community, Learning, Diaspora Hub, and Support Board — differentiated by the `type` enum (14 values)
+
+2. **1-level comment nesting** — `parent_id` on Comment model. Replies can only exist at depth 1 (no nested replies to replies)
+
+3. **Reactions** — Uses either `post_id` or `comment_id` (never both), enforced at schema + controller level
+
+4. **Denormalized counters** — `comment_count` and `reaction_count` on the Post model for fast reads without aggregation
+
+5. **Notification triggers** — Built into comment/reaction/connection controllers. The `notificationService.js` utility keeps creation clean
+
+6. **JWT access tokens are stateless** — They remain valid until expiry. `/logout` only invalidates the refresh token. For full invalidation, use short expiry (15 min recommended in production) or add a token blacklist
+
+7. **Admin role** — Protected by `restrictTo('admin')` middleware. Admin users are created via MongoDB direct update (not through the API for security)
