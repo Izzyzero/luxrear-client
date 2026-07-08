@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form'
 import { Trash2, CornerDownRight } from 'lucide-react'
 import { getAccessToken } from '../../services/authService'
 
-const API_COMMENTS = "http://localhost:5000/api/comments"
+const API_COMMENTS = `${import.meta.env.VITE_API_URL}/comments`
 
 const getInitials = (name) =>
   name?.split(' ').map((p) => p[0]).slice(0, 2).join('').toUpperCase() || '?'

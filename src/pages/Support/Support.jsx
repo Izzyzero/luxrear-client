@@ -16,7 +16,7 @@ import {
 import { getAccessToken } from '../../services/authService'
 
 const requestTabs = ['requests', 'responses']
-const API_BASE = 'http://localhost:5000/api'
+const API_BASE = `${import.meta.env.VITE_API_URL}`
 
 const emptyRequestForm = {
   title: '',

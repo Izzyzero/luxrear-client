@@ -6,7 +6,7 @@ import { X, Image, ChevronDown } from 'lucide-react'
 import { EXCHANGE_POST_TYPES, EXCHANGE_TYPE_LIST } from '../../services/Exchangetypes'
 import { getAccessToken } from '../../services/authService'
 
-const API_BASE = 'http://localhost:5000/api/posts'
+const API_BASE = `${import.meta.env.VITE_API_URL}/posts`
 
 const schema = z.object({
   type: z.string().min(1, 'Please select a post type'),

@@ -8,7 +8,7 @@ import { CreatePostBox } from '../../components/feed/CreatePostBox'
 import { FEED_WELCOME_MESSAGE, EMPTY_STATES, ENGAGEMENT_PROMPTS } from '../../services/feedContent'
 import { getAccessToken } from '../../services/authService'
 
-const API_BASE = "http://localhost:5000/api/posts"
+const API_BASE = `${import.meta.env.VITE_API_URL}/posts`
 
 export const HomeFeedPage = () => {
   const { user } = useOutletContext()

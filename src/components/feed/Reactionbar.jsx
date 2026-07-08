@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { ThumbsUp } from 'lucide-react'
 import { getAccessToken } from '../../services/authService'
 
-const API_REACTIONS = "http://localhost:5000/api/reactions"
+const API_REACTIONS = `${import.meta.env.VITE_API_URL}/reactions`
 
 const REACTION_TYPES = [
   { type: 'like',       emoji: '👍', label: 'Like',       color: 'text-blue-600' },

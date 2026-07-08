@@ -16,7 +16,7 @@ const INDUSTRIES = [
   'Fashion',
 ]
 
-const API_BASE = "http://localhost:5000/api/profiles"
+const API_BASE = `${import.meta.env.VITE_API_URL}/profiles`
 
 const profileSchema = z.object({
   full_name: z.string().min(1, "Full name is required"),

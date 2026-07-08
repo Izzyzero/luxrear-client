@@ -6,7 +6,7 @@ import { X } from 'lucide-react'
 import { COMMUNITY_BOARDS, COMMUNITY_POST_TYPES } from '../../services/communityboards'
 import { getAccessToken } from '../../services/authService'
 
-const API_BASE = 'http://localhost:5000/api/posts'
+const API_BASE = `${import.meta.env.VITE_API_URL}/posts`
 
 const schema = z.object({
   board: z.string().min(1, 'Please select a board'),

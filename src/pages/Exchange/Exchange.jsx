@@ -7,7 +7,7 @@ import { FeedEmptyState } from '../../components/feed/feedEmptyState'
 import { EXCHANGE_POST_TYPES, EXCHANGE_TYPE_LIST } from '../../services/Exchangetypes'
 import { getAccessToken } from '../../services/authService'
 
-const API_BASE = 'http://localhost:5000/api/posts'
+const API_BASE = `${import.meta.env.VITE_API_URL}/posts`
 
 // The 6 Exchange types as a comma-separated query param so the backend
 // filters only Exchange posts, not Home Feed types

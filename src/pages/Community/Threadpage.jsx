@@ -6,8 +6,8 @@ import { ArrowLeft, Trash2, CornerDownRight, Tag } from 'lucide-react'
 import { UpvoteButton } from '../../components/community/Upvotebutton'
 import { getAccessToken } from '../../services/authService'
 
-const API_POSTS = 'http://localhost:5000/api/posts'
-const API_COMMENTS = 'http://localhost:5000/api/comments'
+const API_POSTS = `${import.meta.env.VITE_API_URL}/posts`
+const API_COMMENTS = `${import.meta.env.VITE_API_URL}/comments`
 
 const formatTime = (isoString) => {
   const diffMs = Date.now() - new Date(isoString).getTime()

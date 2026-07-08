@@ -6,7 +6,7 @@ import { FeedEmptyState } from '../../components/feed/feedEmptyState'
 import { COMMUNITY_BOARDS, COMMUNITY_POST_TYPES, getBoardBySlug } from '../../services/communityboards'
 import { getAccessToken } from '../../services/authService'
 
-const API_BASE = 'http://localhost:5000/api/posts'
+const API_BASE = `${import.meta.env.VITE_API_URL}/posts`
 const COMMUNITY_POST_TYPE_QUERY = COMMUNITY_POST_TYPES.map((type) => type.value).join(',')
 
 export const CommunityPage = () => {

@@ -2,7 +2,7 @@ import { useState, useRef } from 'react'
 import { ChevronUp } from 'lucide-react'
 import { getAccessToken } from '../../services/authService'
 
-const API_REACTIONS = 'http://localhost:5000/api/reactions'
+const API_REACTIONS = `${import.meta.env.VITE_API_URL}/reactions`
 
 export const UpvoteButton = ({ post, size = 'md' }) => {
   const [isUpvoted, setIsUpvoted] = useState(false)

@@ -7,7 +7,7 @@ import { POST_TYPES } from '../../services/postType'
 import { getCategoriesForType } from '../../services/categories'
 import { getAccessToken } from '../../services/authService'
 
-const API_BASE = "http://localhost:5000/api/posts"
+const API_BASE = `${import.meta.env.VITE_API_URL}/posts`
 
 const CreatePostSchema = z.object({
   type: z.string().min(1, "Please choose a post type"),

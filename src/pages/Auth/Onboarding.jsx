@@ -38,7 +38,7 @@ export const OnboardingPage = () => {
     }
 
     try {
-      const response = await fetch("http://localhost:5000/api/auth/onboarding", {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/auth/onboarding`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
