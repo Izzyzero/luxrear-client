@@ -2,7 +2,9 @@ import Reaction from '../models/Reaction.js';
 import Post from '../models/Post.js';
 import Comment from '../models/Comment.js';
 import Profile from '../models/Profile.js';
+import User from '../models/User.js';
 import { successResponse, errorResponse } from '../utils/apiResponse.js';
+import { createNotification } from '../utils/notificationService.js';
 
 export const toggleReaction = async (req, res, next) => {
   try {
@@ -58,6 +60,43 @@ export const toggleReaction = async (req, res, next) => {
 
     if (post_id) {
       await Post.findByIdAndUpdate(post_id, { $inc: { reaction_count: 1 } });
+
+      // Notify post owner
+      const post = await Post.findById(post_id);
+      if (post) {
+        const postOwnerProfile = await Profile.findById(post.profile_id);
+        if (postOwnerProfile && postOwnerProfile.user_id.toString() !== req.user._id.toString()) {
+          const postOwner = await User.findById(postOwnerProfile.user_id);
+          if (postOwner) {
+            await createNotification({
+              user_id: postOwner._id,
+              type: 'post_reaction',
+              message: `${profile.full_name || 'A member'} reacted with ${type} to your post: "${post.title.substring(0, 50)}"`,
+              reference_id: reaction._id,
+              reference_type: 'Post',
+            });
+          }
+        }
+      }
+    }
+
+    if (comment_id) {
+      const reactedComment = await Comment.findById(comment_id);
+      if (reactedComment) {
+        const commentOwnerProfile = await Profile.findById(reactedComment.profile_id);
+        if (commentOwnerProfile && commentOwnerProfile.user_id.toString() !== req.user._id.toString()) {
+          const commentOwner = await User.findById(commentOwnerProfile.user_id);
+          if (commentOwner) {
+            await createNotification({
+              user_id: commentOwner._id,
+              type: 'post_reaction',
+              message: `${profile.full_name || 'A member'} reacted with ${type} to your comment.`,
+              reference_id: reaction._id,
+              reference_type: 'Comment',
+            });
+          }
+        }
+      }
     }
 
     return successResponse(res, 201, 'Reaction added.', { reacted: true, reaction });
