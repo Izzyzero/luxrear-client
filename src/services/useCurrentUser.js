@@ -31,7 +31,10 @@ export const useCurrentUser = () => {
           throw new Error(result.message || "Failed to load user.");
         }
 
-        setUser(result.data.user);
+        setUser({
+          ...result.data.user,
+          profile: result.data.profile,
+        });
 
       } catch (err) {
         setError(err.message);

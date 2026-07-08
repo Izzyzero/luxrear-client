@@ -20,7 +20,7 @@ const navItems = [
   { label: 'Profile', to: '/dashboard/profile', icon: User },
   { label: 'Exchange', to: '/dashboard/exchange', icon: Repeat },
   { label: 'Community', to: '/dashboard/community', icon: Users },
-  { label: 'Diaspora Hub', to: '/dashboard/diaspora-hub', icon: Globe },
+  { label: 'Diaspora', to: '/dashboard/diaspora', icon: Globe },
   { label: 'Support Board', to: '/dashboard/support', icon: LifeBuoy },
 ]
 

@@ -114,6 +114,15 @@ router.get(
   getAllPosts
 );
 
+// GET /api/posts/categories/:id
+router.get(
+  '/categories/:id',
+  optionalAuth,
+  [param('id').isMongoId().withMessage('Invalid post ID')],
+  validate,
+  getPostById
+);
+
 // GET /api/posts/:id
 router.get(
   '/:id',

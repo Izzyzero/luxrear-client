@@ -13,6 +13,7 @@ import {CommunityPage} from '../pages/Community/Community'
 import {DiasporaPage} from '../pages/Diaspora/Diaspora'
 import {SupportPage} from '../pages/Support/Support'
 import {AdminPage} from '../pages/Admin/Admin'
+import {ThreadPage} from '../pages/Community/ThreadPage'
 
 
 
@@ -31,6 +32,7 @@ function AppRoutes() {
   <Route path="profile" element={<ProfilePage />} />
   <Route path="exchange" element={<ExchangePage />} />
   <Route path="community" element={<CommunityPage />} />
+<Route path="community/thread/:postId" element={<ThreadPage />} />
   <Route path="diaspora" element={<DiasporaPage />} />
   <Route path="support" element={<SupportPage />} />
   <Route path="admin" element={<AdminPage />} />
