@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { X, Image, ChevronDown } from 'lucide-react'
-import { EXCHANGE_POST_TYPES, EXCHANGE_TYPE_LIST } from '../../services/exchangeTypes'
+import { EXCHANGE_POST_TYPES, EXCHANGE_TYPE_LIST } from '../../services/Exchangetypes'
 import { getAccessToken } from '../../services/authService'
 
 const API_BASE = 'http://localhost:5000/api/posts'

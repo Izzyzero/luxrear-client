@@ -65,26 +65,26 @@ router.post(
       .isLength({ max: 200 })
       .withMessage('Title max 200 characters'),
     body('description')
-      .optional()
+      .optional({ values: 'null' })
       .trim()
       .isLength({ max: 5000 })
       .withMessage('Description max 5000 characters'),
     body('category_id')
-      .optional()
+      .optional({ values: 'null' })
       .isMongoId()
       .withMessage('Invalid category ID'),
     body('video_url')
-      .optional()
+      .optional({ values: 'null' })
       .trim()
       .isURL()
       .withMessage('Video URL must be a valid URL'),
     body('location')
-      .optional()
+      .optional({ values: 'null' })
       .trim()
       .isLength({ max: 100 })
       .withMessage('Location max 100 characters'),
     body('tags')
-      .optional()
+      .optional({ values: 'null' })
       .isArray()
       .withMessage('Tags must be an array'),
   ],
@@ -138,33 +138,33 @@ router.put(
   [
     param('id').isMongoId().withMessage('Invalid post ID'),
     body('title')
-      .optional()
+      .optional({ values: 'null' })
       .trim()
       .notEmpty()
       .withMessage('Title cannot be empty')
       .isLength({ max: 200 })
       .withMessage('Title max 200 characters'),
     body('description')
-      .optional()
+      .optional({ values: 'null' })
       .trim()
       .isLength({ max: 5000 })
       .withMessage('Description max 5000 characters'),
     body('category_id')
-      .optional()
+      .optional({ values: 'null' })
       .isMongoId()
       .withMessage('Invalid category ID'),
     body('video_url')
-      .optional()
+      .optional({ values: 'null' })
       .trim()
       .isURL()
       .withMessage('Video URL must be a valid URL'),
     body('location')
-      .optional()
+      .optional({ values: 'null' })
       .trim()
       .isLength({ max: 100 })
       .withMessage('Location max 100 characters'),
     body('tags')
-      .optional()
+      .optional({ values: 'null' })
       .isArray()
       .withMessage('Tags must be an array'),
   ],

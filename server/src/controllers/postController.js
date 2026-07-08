@@ -1,5 +1,6 @@
 import Post from '../models/Post.js';
 import Profile from '../models/Profile.js';
+import Reaction from '../models/Reaction.js';
 import { uploadToCloudinary } from '../middleware/upload.js';
 import { successResponse, errorResponse, paginatedResponse } from '../utils/apiResponse.js';
 
@@ -114,6 +115,26 @@ export const getAllPosts = async (req, res, next) => {
       Post.countDocuments(filter),
     ]);
 
+    // Attach the current user's reaction per post so the frontend doesn't
+    // need a second API call per post — fixes likes disappearing on navigation.
+    if (req.user && posts.length > 0) {
+      const profile = await Profile.findOne({ user_id: req.user._id });
+      if (profile) {
+        const postIds = posts.map(p => p._id);
+        const userReactions = await Reaction.find({
+          post_id: { $in: postIds },
+          profile_id: profile._id,
+        });
+        const reactionMap = {};
+        for (const r of userReactions) {
+          reactionMap[r.post_id.toString()] = r.type;
+        }
+        for (const post of posts) {
+          post._doc.my_reaction = reactionMap[post._id.toString()] || null;
+        }
+      }
+    }
+
     const pages = Math.ceil(total / parseInt(limit));
 
     return paginatedResponse(res, 'Posts fetched.', posts, {
@@ -139,6 +160,18 @@ export const getPostById = async (req, res, next) => {
 
     if (!post) {
       return errorResponse(res, 404, 'Post not found.');
+    }
+
+    // Attach the current user's reaction if authenticated
+    if (req.user) {
+      const profile = await Profile.findOne({ user_id: req.user._id });
+      if (profile) {
+        const reaction = await Reaction.findOne({
+          post_id: post._id,
+          profile_id: profile._id,
+        });
+        post._doc.my_reaction = reaction ? reaction.type : null;
+      }
     }
 
     return successResponse(res, 200, 'Post fetched.', { post });

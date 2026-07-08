@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { useOutletContext } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { ArrowLeft, Trash2, CornerDownRight, Tag } from 'lucide-react'
-import { UpvoteButton } from '../../components/community/UpvoteButton'
+import { UpvoteButton } from '../../components/community/Upvotebutton'
 import { getAccessToken } from '../../services/authService'
 
 const API_POSTS = 'http://localhost:5000/api/posts'

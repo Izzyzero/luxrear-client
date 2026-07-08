@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { MessageCircle, Bookmark, MapPin } from 'lucide-react'
 import { POST_TYPES } from '../../services/postType'
-import { ReactionBar } from './ReactionBar'
-import { CommentSection } from './CommentSection'
+import { ReactionBar } from './Reactionbar'
+import { CommentSection } from './Commentsection'
 
 const formatRelativeTime = (isoString) => {
   const diffMs = Date.now() - new Date(isoString).getTime()

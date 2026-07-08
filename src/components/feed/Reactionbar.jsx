@@ -15,7 +15,7 @@ const getReactionConfig = (type) =>
   REACTION_TYPES.find((r) => r.type === type) || null
 
 export const ReactionBar = ({ post, currentProfileId }) => {
-  const [myReaction, setMyReaction] = useState(null)
+  const [myReaction, setMyReaction] = useState(post.my_reaction ?? null)
   const [reactionCount, setReactionCount] = useState(post.reaction_count ?? 0)
   const [showPicker, setShowPicker] = useState(false)
 

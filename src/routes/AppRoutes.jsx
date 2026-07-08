@@ -13,7 +13,7 @@ import {CommunityPage} from '../pages/Community/Community'
 import {DiasporaPage} from '../pages/Diaspora/Diaspora'
 import {SupportPage} from '../pages/Support/Support'
 import {AdminPage} from '../pages/Admin/Admin'
-import {ThreadPage} from '../pages/Community/ThreadPage'
+import {ThreadPage} from '../pages/Community/Threadpage'
 
 
 

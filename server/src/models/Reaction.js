@@ -47,7 +47,7 @@ reactionSchema.index(
 );
 reactionSchema.index(
   { comment_id: 1, profile_id: 1 },
-  { unique: true, sparse: true }
+  { unique: true, partialFilterExpression: { comment_id: { $type: 'objectId' } } }
 );
 
 const Reaction = mongoose.model('Reaction', reactionSchema);

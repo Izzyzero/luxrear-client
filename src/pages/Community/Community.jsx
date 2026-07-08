@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Plus } from 'lucide-react'
-import { ThreadCard } from '../../components/community/ThreadCard'
+import { ThreadCard } from '../../components/community/Threadcard'
 import { CreateThreadModal } from '../../components/community/Createthreadmodal'
 import { FeedEmptyState } from '../../components/feed/feedEmptyState'
 import { COMMUNITY_BOARDS, COMMUNITY_POST_TYPES, getBoardBySlug } from '../../services/communityboards'

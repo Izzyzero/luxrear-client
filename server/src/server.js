@@ -9,6 +9,7 @@ import connectDB from './config/db.js';
 import routes from './routes/index.js';
 import errorHandler from './middleware/errorHandler.js';
 import { seedCategories } from './utils/seedCategories.js';
+import Reaction from './models/Reaction.js';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -106,6 +107,22 @@ app.use(errorHandler);
 const start = async () => {
   await connectDB();
   await seedCategories();
+
+  // Migrate broken Reaction index: the old sparse index on
+  // { comment_id, profile_id } treated null comment_id as a real value,
+  // causing 409 errors on the 2nd post-reaction. Replace with a
+  // partialFilterExpression that only applies to actual comment ObjectIds.
+  try {
+    const reactionCollection = Reaction.collection;
+    const indexes = await reactionCollection.indexes();
+    const oldIndex = indexes.find(i => i.name === 'comment_id_1_profile_id_1');
+    if (oldIndex) {
+      await reactionCollection.dropIndex('comment_id_1_profile_id_1');
+      console.log('  ↳ Migrated Reaction index: comment_id_1_profile_id_1 rebuilt with partialFilterExpression');
+    }
+  } catch (err) {
+    console.warn('  ⚠ Could not migrate Reaction index (may not exist yet):', err.message);
+  }
 
   app.listen(PORT, () => {
     console.log(`\n🚀 LUXREAR API running on port ${PORT}`);

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useOutletContext } from 'react-router-dom'
 import { Lightbulb } from 'lucide-react'
-import { PostCard } from '../../components/feed/PostCard'
+import { PostCard } from '../../components/feed/postCard'
 import { FeedFilters } from '../../components/feed/feedFilters'
 import { FeedEmptyState } from '../../components/feed/feedEmptyState'
 import { CreatePostBox } from '../../components/feed/CreatePostBox'
